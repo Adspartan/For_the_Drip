@@ -1,0 +1,4 @@
+*       text
+
+# Sources
+*.lua     text diff=lua
