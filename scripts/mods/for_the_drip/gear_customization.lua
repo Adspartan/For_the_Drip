@@ -138,6 +138,19 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   if source_item then
     if not source_item.attachments then
       rawset(source_item, "attachments", {})
+    else
+      -- reset extra attachments in case they got removed
+      for name, att_data in pairs(source_item.attachments) do
+        if att_data.is_extra then
+          source_item.attachments[name] =
+          {
+            ["children"] = {},
+            ["material_overrides"] = {},
+            ["item"] = "",
+            ["is_extra"] = true,
+          }
+        end
+      end
     end
     -- to account for the added attachment, check the saved data first if available
     local attach_count = table.size(customization_data and customization_data.attachments or source_item.attachments)
@@ -149,7 +162,8 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
         {
           ["children"] = {},
           ["material_overrides"] = {},
-          ["item"] = item
+          ["item"] = item,
+          ["is_extra"] = true,
         }
 
         customization_data.attachments[item] =
