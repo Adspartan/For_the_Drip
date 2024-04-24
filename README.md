@@ -53,9 +53,6 @@ Select a slot in the 'Slot Customization' section to customize it further
 
 # Currently Known Issues
 - **If the UI goes out of the game window it'll bug out/move on its own, there is a keybind to reset the UI when that happens** (quirk of the ImGui implementation in the game)
-- Character isn't showing up in game lobbies
-- Inventory view isn't updating until after leaving it
 - Head masks aren't working
-- Some deleted attachments won't diseappear until the item is further edited (or after a character change/game reboot)
 - Voice filters not being applied
   
