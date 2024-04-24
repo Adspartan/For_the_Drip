@@ -1,3 +1,8 @@
+# Why isn't the mod on nexus ?
+Because there's still some issues with it, they are getting sorted out but I don't want to upload an unstable mod there.
+
+
+
 # Support
 For support go to the [Modding Discord](https://discord.gg/rKYWtaDx4D) -> [For the Drip Post](https://discord.com/channels/1048312349867646996/1048318548180738118/1163114688540848169)
 
