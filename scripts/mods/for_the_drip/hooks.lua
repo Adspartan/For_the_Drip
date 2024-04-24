@@ -210,56 +210,40 @@ mod:hook_safe(CLASS.UIWeaponSpawner, "_spawn_weapon", function(self, item, link_
 end)
 
 
--- check if it can affect other players ? (when changing loadout)
-mod:hook(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character", function (func, self, slot_id, item)
-	if item then
-		local custom_item = mod:make_custom_item(slot_id, item, "_equip_item_for_spawn_character")
+mod:hook(CLASS.UIProfileSpawner, "_change_slot_item", function (func, self, slot_id, item)
+	local character_spawn_data = self._character_spawn_data
+	local loading_profile_data = self._loading_profile_data
+	local use_loader_version = loading_profile_data ~= nil
+	local profile_loader = use_loader_version and loading_profile_data.profile_loader or character_spawn_data.profile_loader
+	local profile = use_loader_version and loading_profile_data.profile or character_spawn_data.profile
+	local data = loading_profile_data or character_spawn_data
 
-		mod:load_extra_packages_if_needed(custom_item, function()
-			if slot_id == "slot_gear_head" then
-				mod:persistent_table("data").head_gear_name = custom_item.name
-			end
+	if profile.character_id == mod:persistent_table("data").character_id and slot_id ~= "slot_body_face" then
+		local custom_item = mod:make_custom_item(slot_id, item)
 
-			local character_spawn_data = self._character_spawn_data
-			local loading_profile_data = self._loading_profile_data
-			local use_loader_version = loading_profile_data ~= nil
-			local profile_loader = use_loader_version and loading_profile_data.profile_loader or character_spawn_data.profile_loader
-			local profile = use_loader_version and loading_profile_data.profile or character_spawn_data.profile
-			local loadout = profile.loadout
+		profile.loadout[slot_id] = custom_item
 
-			-- update the loadout item otherwise the game will spam re-equip the original item
-			loadout[slot_id] = custom_item
-			func(self, slot_id, custom_item)
-
-			if slot_id == "slot_primary" or slot_id == "slot_secondary" then
-				local player = Managers.player:local_player_safe(1)
-				mod:apply_customization_to_back_weapons(self, player.player_unit, slot_id)
-			end
-		end)
-	else -- pass it on in case it's needed somewhere
+		func(self, slot_id, custom_item)
+	else
 		func(self, slot_id, item)
 	end
 end)
 
-mod:hook(CLASS.UICharacterProfilePackageLoader, "load_profile", function (func, self, profile)
-	local id = profile.character_id
+mod:hook_safe(CLASS.PlayerManager, "add_player", function (self, player_class, channel_id, peer_id, local_player_id, profile, slot, account_id, ...)
 	local player = Managers.player:local_player_safe(1)
 
-	if id and player and id == player:character_id() then
-		-- load new character preset
-		if mod:persistent_table("data").character_id ~= id then
-			mod:persistent_table("data").character_id = id
-			mod:load_current_character_loadout()
-		end
+	if player:character_id() ~= mod:persistent_table("data").character_id then
+		mod:persistent_table("data").character_id = player:character_id()
+		mod:load_current_character_loadout()
+	end
+end)
 
+
+mod:hook(CLASS.UIProfileSpawner, "spawn_profile", function(func, self, profile, ...)
+	local id = profile.character_id
+
+	if id and id == mod:persistent_table("data").character_id then
 		local loadout = profile.loadout
-
-		loadout["slot_gear_head"] = mod:make_custom_item("slot_gear_head", loadout["slot_gear_head"])
-		loadout["slot_gear_upperbody"] = mod:make_custom_item("slot_gear_upperbody", loadout["slot_gear_upperbody"])
-		loadout["slot_gear_lowerbody"] = mod:make_custom_item("slot_gear_lowerbody", loadout["slot_gear_lowerbody"])
-		loadout["slot_gear_extra_cosmetic"] = mod:make_custom_item("slot_gear_head", loadout["slot_gear_extra_cosmetic"])
-		loadout["slot_primary"] = mod:make_custom_item("slot_primary", loadout["slot_primary"])
-		loadout["slot_secondary"] = mod:make_custom_item("slot_secondary", loadout["slot_secondary"])
 
 		local archetype = profile.archetype
 		local archetype_name = archetype and archetype.name
@@ -267,29 +251,18 @@ mod:hook(CLASS.UICharacterProfilePackageLoader, "load_profile", function (func, 
 
 		mod:persistent_table("data").breed = breed_name
 		mod:persistent_table("data").gender = profile.gender
+
+		loadout["slot_gear_head"] = mod:make_custom_item("slot_gear_head", loadout["slot_gear_head"])
+		loadout["slot_gear_upperbody"] = mod:make_custom_item("slot_gear_upperbody", loadout["slot_gear_upperbody"])
+		loadout["slot_gear_lowerbody"] = mod:make_custom_item("slot_gear_lowerbody", loadout["slot_gear_lowerbody"])
+		loadout["slot_gear_extra_cosmetic"] = mod:make_custom_item("slot_gear_head", loadout["slot_gear_extra_cosmetic"])
+		loadout["slot_primary"] = mod:make_custom_item("slot_primary", loadout["slot_primary"])
+		loadout["slot_secondary"] = mod:make_custom_item("slot_secondary", loadout["slot_secondary"])
 	end
 
-	return func(self, profile)
+	func(self, profile, ...)
 end)
 
-
-mod:hook(CLASS.UIProfileSpawner, "_spawn_character_profile", function(func, self, profile, profile_loader, position, rotation, scale, state_machine, animation_event, face_state_machine_key, face_animation_event, force_highest_mip, disable_hair_state_machine, optional_unit_3p, optional_ignore_state_machine)
-	local id = profile.character_id
-
-	func(self, profile, profile_loader, position, rotation, scale, state_machine, animation_event, face_state_machine_key, face_animation_event, force_highest_mip, disable_hair_state_machine, optional_unit_3p, optional_ignore_state_machine)
-
-	if id then
-		local player = Managers.player:local_player_safe(1)
-
-		if player and id == player:character_id() then
-			mod:persistent_table("data").character_id = id
-
-			-- show customization on weapons
-			mod:apply_customization_to_back_weapons(self, player.player_unit, "slot_primary")
-			mod:apply_customization_to_back_weapons(self, player.player_unit, "slot_secondary")
-		end
-	end
-end)
 
 mod:hook_safe(CLASS.LevelLoader, "_level_load_done_callback", function(self, item_definitions, ...)
 	if self._level_name then

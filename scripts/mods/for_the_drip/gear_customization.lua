@@ -60,15 +60,15 @@ mod.remove_custom_attachment = function(self, item_name, attachment_name, attach
   return false
 end
 
-mod.make_custom_item = function(self, slot_name, base_item, source)
-  if not base_item then
+mod.make_custom_item = function(self, slot_name, source_item, source)
+  if not source_item then
     return nil
   end
 
   if slot_name == "slot_body_face" then
-    local item = table.clone_instance(base_item)
+    local item = table.clone_instance(source_item)
 
-    local gear_head_item = base_item.attachments and base_item.attachments["slot_gear_head"] and base_item.attachments["slot_gear_head"].item or table.clone_instance(MasterItems.get_item("content/items/characters/player/human/gear_head/empty_headgear"))
+    local gear_head_item = source_item.attachments and source_item.attachments["slot_gear_head"] and source_item.attachments["slot_gear_head"].item or table.clone_instance(MasterItems.get_item("content/items/characters/player/human/gear_head/empty_headgear"))
     local custom_head_gear = mod:make_custom_item("slot_gear_head", gear_head_item)
 
     if not item.attachments then
@@ -89,26 +89,19 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
   end
 
   local slot_data = mod.current_slots_data[slot_name]
-  local item_custom = nil
+  local customization_data = nil
 
   if mod.current_slots_data.gear_customization_data then
-    item_custom = mod.current_slots_data.gear_customization_data[base_item.name]
+    customization_data = mod.current_slots_data.gear_customization_data[source_item.name]
   end
 
-  if (not item_custom) and (not slot_data) then
-    return base_item
+  if (not customization_data) and (not slot_data) then
+    return source_item
   end
 
-  local customized_item = table.clone_instance(base_item)
-  local master_item = table.clone(MasterItems.get_item(base_item.name))
+  local source_item = source_item
+  local master_item = table.clone(MasterItems.get_item(source_item.name))
 
-  if customized_item.attachments and master_item.attachments then
-    rawset(customized_item, "attachments", table.merge(master_item.attachments, customized_item.attachments))
-  end
-
-  if customized_item.material_overrides then
-    rawset(customized_item, "material_overrides", master_item.material_overrides or {})
-  end
 
   local skip_attachments = false
   local has_custom_attach_material = false
@@ -123,7 +116,18 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
 
   ItemMaterialOverrides[full_mat_name] = table.clone(custom_slot_mat_data)
 
-  if not item_custom then
+  if slot_name == "slot_primary" or slot_name == "slot_secondary" then
+    rawset(source_item, "material_overrides", {full_mat_name})
+
+    return source_item
+  end
+
+
+  if source_item.material_overrides then
+    rawset(source_item, "material_overrides", master_item.material_overrides or {})
+  end
+
+  if not customization_data then
     skip_attachments = true
   end
 
@@ -131,24 +135,24 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
 
 
 
-  if customized_item then
-    if not customized_item.attachments then
-      rawset(customized_item, "attachments", {})
+  if source_item then
+    if not source_item.attachments then
+      rawset(source_item, "attachments", {})
     end
     -- to account for the added attachment, check the saved data first if available
-    local attach_count = table.size(item_custom and item_custom.attachments or customized_item.attachments)
+    local attach_count = table.size(customization_data and customization_data.attachments or source_item.attachments)
 
-    if item_custom and item_custom.extra_attachments then
-      for k, item in pairs(item_custom.extra_attachments) do
+    if customization_data and customization_data.extra_attachments then
+      for k, item in pairs(customization_data.extra_attachments) do
         local attach_name = "attachment_"..(attach_count+k)
-        customized_item.attachments[attach_name] =
+        source_item.attachments[attach_name] =
         {
           ["children"] = {},
           ["material_overrides"] = {},
           ["item"] = item
         }
 
-        item_custom.attachments[item] =
+        customization_data.attachments[item] =
         {
           ["is_visible"] = true,
           ["customize"] = true,
@@ -164,14 +168,14 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
       -- save the current loadout to make sure the attachments are saved
       mod:save_current_loadout()
 
-      item_custom.extra_attachments = nil -- attachment added, no need to keep them here
+      customization_data.extra_attachments = nil -- attachment added, no need to keep them here
     end
 
-    if item_custom then
-      for item, att_data in pairs(item_custom.attachments) do
+    if customization_data then
+      for item, att_data in pairs(customization_data.attachments) do
         if att_data.is_extra then
 
-          customized_item.attachments[att_data.name] =
+          source_item.attachments[att_data.name] =
           {
             ["children"] = {},
             ["material_overrides"] = {},
@@ -186,8 +190,8 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
     end
   end
 
-  if (not skip_attachments) and customized_item.attachments then
-    for attach_name, attach_data in pairs(customized_item.attachments) do
+  if (not skip_attachments) and source_item.attachments then
+    for attach_name, attach_data in pairs(source_item.attachments) do
       if attach_data.item and attach_data.item ~= "" then
         local item = attach_data.item
 
@@ -196,7 +200,7 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
         end
 
         local short_name = mod:shorten_item_name(item)
-        local data = item_custom and item_custom.attachments[item]
+        local data = customization_data and customization_data.attachments[item]
         local attach_mat_name = slot_name .."_"..attach_name.."_"..short_name.."_material"
 
         if data then
@@ -263,80 +267,80 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
       end
     end
 
-    rawset(customized_item, "attachments", table.clone(attachments))
-  elseif not customized_item then
-    for attach_name, attach_data in pairs(customized_item.attachments) do
+    rawset(source_item, "attachments", table.clone(attachments))
+  elseif not source_item then
+    for attach_name, attach_data in pairs(source_item.attachments) do
       rawset(attach_data, "material_overrides", {})
     end
   end
 
   if slot_name == "slot_gear_upperbody" then
     if mod.current_slots_data["shirtless"] then
-      rawset(customized_item, "mask_torso", "mask_default")
-      rawset(customized_item, "mask_arms", "mask_default")
-      rawset(customized_item, "hide_slots", {})
-      rawset(customized_item, "attachments", {})
+      rawset(source_item, "mask_torso", "mask_default")
+      rawset(source_item, "mask_arms", "mask_default")
+      rawset(source_item, "hide_slots", {})
+      rawset(source_item, "attachments", {})
 
-    elseif item_custom then
-      rawset(customized_item, "mask_torso", item_custom.mask_torso)
-      rawset(customized_item, "mask_arms", item_custom.mask_arms)
+    elseif customization_data then
+      rawset(source_item, "mask_torso", customization_data.mask_torso)
+      rawset(source_item, "mask_arms", customization_data.mask_arms)
 
       local hide_slots = {}
 
-      if item_custom.hide_body then
+      if customization_data.hide_body then
         table.insert(hide_slots, "slot_body_torso")
       end
-      if item_custom.hide_arms then
+      if customization_data.hide_arms then
         table.insert(hide_slots, "slot_body_arms")
       end
 
-      rawset(customized_item, "hide_slots", hide_slots)
+      rawset(source_item, "hide_slots", hide_slots)
     end
   elseif slot_name == "slot_gear_lowerbody" then
     if mod.current_slots_data["pantless"] then
-      rawset(customized_item, "mask_legs", "mask_default")
-      rawset(customized_item, "hide_slots", {})
-      rawset(customized_item, "attachments", {})
+      rawset(source_item, "mask_legs", "mask_default")
+      rawset(source_item, "hide_slots", {})
+      rawset(source_item, "attachments", {})
 
       skip_attachments = true
-    elseif item_custom then
-      rawset(customized_item, "mask_legs", item_custom.mask_legs)
+    elseif customization_data then
+      rawset(source_item, "mask_legs", customization_data.mask_legs)
 
       local hide_slots = {}
 
-      if item_custom.hide_legs then
+      if customization_data.hide_legs then
         table.insert(hide_slots, "slot_body_legs")
       end
 
-      rawset(customized_item, "hide_slots", hide_slots)
+      rawset(source_item, "hide_slots", hide_slots)
     end
   elseif slot_name == "slot_gear_head" then
-    if item_custom then
-      rawset(customized_item, "hide_eyebrows", item_custom.hide_eyebrows)
-      rawset(customized_item, "hide_beard", item_custom.hide_beard)
-      rawset(customized_item, "mask_hair", item_custom.mask_hair)
-      rawset(customized_item, "mask_facial_hair", item_custom.mask_facial_hair)
+    if customization_data then
+      rawset(source_item, "hide_eyebrows", customization_data.hide_eyebrows)
+      rawset(source_item, "hide_beard", customization_data.hide_beard)
+      rawset(source_item, "mask_hair", customization_data.mask_hair)
+      rawset(source_item, "mask_facial_hair", customization_data.mask_facial_hair)
 
 
-      if customized_item.base_unit == "content/characters/empty_item/empty_item" then
-        rawset(customized_item, "base_unit", "content/characters/player/human/third_person/base_gear_rig")
-        rawset(customized_item.resource_dependencies, "content/characters/player/human/third_person/base_gear_rig", true)
+      if source_item.base_unit == "content/characters/empty_item/empty_item" then
+        rawset(source_item, "base_unit", "content/characters/player/human/third_person/base_gear_rig")
+        rawset(source_item.resource_dependencies, "content/characters/player/human/third_person/base_gear_rig", true)
       end
       -- local hide_slots = {}
 
-      -- if item_custom.hide_hair then
+      -- if customization_data.hide_hair then
       --  table.insert(hide_slots, "slot_body_hair")
       -- end
 
-      -- rawset(customized_item, "hide_slots", hide_slots)
+      -- rawset(source_item, "hide_slots", hide_slots)
     end
   end
 
   local material_names = {}
 
   if not has_custom_attach_material then
-    if item_custom and item_custom.material_overrides then
-      material_overrides = table.clone(item_custom.material_overrides)
+    if customization_data and customization_data.material_overrides then
+      material_overrides = table.clone(customization_data.material_overrides)
     end
 
     table.insert(material_names, full_mat_name)
@@ -350,11 +354,10 @@ mod.make_custom_item = function(self, slot_name, base_item, source)
     end
   end
 
-  rawset(customized_item, "material_overrides", material_names)
+  rawset(source_item, "material_overrides", material_names)
 
-  return customized_item
+  return source_item
 end
-
 mod.gear_custom_to_str = function(self, item_data)
   local str = ""
 

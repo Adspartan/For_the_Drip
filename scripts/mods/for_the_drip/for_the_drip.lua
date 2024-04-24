@@ -223,6 +223,23 @@ mod.apply_customization_to_back_weapons = function(self, unit, slot_name)
 	return false
 end
 
+mod.prepare_body_slot_item = function(self, loadout, slot_name)
+	local item = table.clone_instance(loadout[slot_name])
+
+	local attachments = {}
+
+	-- todo: handle children too (used for the face hair colour for ex)
+	for k, slot_dep_name in pairs(PlayerCharacterConstants.slot_configuration[slot_name].slot_dependencies) do
+		local attachment = table.clone_instance(loadout[slot_dep_name])
+
+		attachments[slot_dep_name] = { item = attachment }
+	end
+
+	rawset(item, "attachments", attachments)
+
+	return item
+end
+
 mod.refresh_slot = function(self, slot_name)
 	local visual_loadout_extension = mod:get_visual_loadout_extension()
 
@@ -241,23 +258,6 @@ mod.refresh_slot = function(self, slot_name)
 			end
 		end
 	end
-end
-
-mod.prepare_body_slot_item = function(self, loadout, slot_name)
-	local item = table.clone_instance(loadout[slot_name])
-
-	local attachments = {}
-
-	-- todo: handle children too (used for the face hair colour for ex)
-	for k, slot_dep_name in pairs(PlayerCharacterConstants.slot_configuration[slot_name].slot_dependencies) do
-		local attachment = table.clone_instance(loadout[slot_dep_name])
-
-		attachments[slot_dep_name] = { item = attachment }
-	end
-
-	rawset(item, "attachments", attachments)
-
-	return item
 end
 
 mod.refresh_all_gear_slots = function()
