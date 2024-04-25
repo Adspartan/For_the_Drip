@@ -215,6 +215,9 @@ ImguiDripEditor.slot_customization_ui = function(self)
           if data.hide_hair == nil then
             data.hide_hair = mod:current_head_gear_hide_hair()
           end
+          if data.mask_face == nil then
+            data.mask_face = mod:current_head_gear_mask_face()
+          end
 
           Imgui.spacing()
           Imgui.same_line()
@@ -227,6 +230,19 @@ ImguiDripEditor.slot_customization_ui = function(self)
           Imgui.spacing()
           Imgui.same_line()
           data.hide_eyebrows = Imgui.checkbox("Hide Eyebrows##hide_eyebrows_btn", data.hide_eyebrows)
+          Imgui.spacing()
+          Imgui.same_line()
+
+          if Imgui.begin_combo("Face Mask", data.mask_face) then
+            for k,mask in pairs(mod.face_masks) do
+              if Imgui.selectable(mask, mask == data.mask_face) then
+                data.mask_face = mask
+              end
+            end
+
+            Imgui.end_combo()
+          end
+
           Imgui.spacing()
           Imgui.same_line()
 

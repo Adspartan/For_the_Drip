@@ -87,6 +87,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     rawset(source_item, "hide_beard", custom_head_gear.hide_beard)
     rawset(source_item, "mask_hair", custom_head_gear.mask_hair)
     rawset(source_item, "mask_facial_hair", custom_head_gear.mask_facial_hair)
+    rawset(source_item, "mask_face", custom_head_gear.mask_face)
 
 
     local hide_hair = false
@@ -362,10 +363,13 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     end
   elseif slot_name == "slot_gear_head" then
     if customization_data then
+      customization_data.mask_face = customization_data.mask_face or ""
+
       rawset(source_item, "hide_eyebrows", customization_data.hide_eyebrows)
       rawset(source_item, "hide_beard", customization_data.hide_beard)
       rawset(source_item, "mask_hair", customization_data.mask_hair)
       rawset(source_item, "mask_facial_hair", customization_data.mask_facial_hair)
+      rawset(source_item, "mask_face", customization_data.mask_face)
 
       if source_item.base_unit == "content/characters/empty_item/empty_item" then
         rawset(source_item, "base_unit", "content/characters/player/human/third_person/base_gear_rig")
@@ -428,6 +432,7 @@ mod.gear_custom_to_str = function(self, item_data)
       str = str.."hide_hair;"..tostring(item_data.hide_hair).."###"
     end
     str = str.."hide_beard;"..tostring(item_data.hide_beard).."###"
+    str = str.."mask_face;"..(item_data.mask_face or "").."###"
     str = str.."mask_hair;"..(item_data.mask_hair or "").."###"
     str = str.."mask_facial_hair;"..(item_data.mask_facial_hair or "").."###"
   end
@@ -664,6 +669,20 @@ mod.show_legs_slot = function(self, visual_loadout_extension)
   end
 
   return false
+end
+
+mod.current_head_gear_mask_face = function()
+  local vle = mod:get_visual_loadout_extension()
+
+  if vle then
+    local head_slot = vle._equipment["slot_gear_head"]
+
+    if head_slot and head_slot.item then
+      return head_slot.item.mask_face or ""
+    end
+  end
+
+  return ""
 end
 
 mod.current_head_gear_hide_hair = function()
