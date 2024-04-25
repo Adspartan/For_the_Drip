@@ -82,9 +82,9 @@ mod.dump_table_to_file = function(self, t, depth, filename, append)
     mode = "a"
   end
 
-  local file = assert(_io.open(directory .. filename .. ".txt", mode))
+  local file = assert(_io.open(directory .. filename .. ".lua", mode))
 
-  file:write(table.tostring(t, depth).."\n")
+  file:write(mod:table_tostring(t, depth).."\n")
 
   file:close()
 end

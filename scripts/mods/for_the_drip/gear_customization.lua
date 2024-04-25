@@ -66,26 +66,61 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   end
 
   if slot_name == "slot_body_face" then
-    local item = table.clone_instance(source_item)
-
     local gear_head_item = source_item.attachments and source_item.attachments["slot_gear_head"] and source_item.attachments["slot_gear_head"].item or table.clone_instance(MasterItems.get_item("content/items/characters/player/human/gear_head/empty_headgear"))
     local custom_head_gear = mod:make_custom_item("slot_gear_head", gear_head_item)
 
-    if not item.attachments then
-      rawset(item, "attachments", {})
+    if not source_item.attachments then
+      rawset(source_item, "attachments", {})
     end
 
-    if not item.attachments["slot_gear_head"] then
-      rawset(item.attachments, "slot_gear_head" , {
+    if not source_item.attachments["slot_gear_head"] then
+      rawset(source_item.attachments, "slot_gear_head" , {
               ["children"] = {},
               ["material_overrides"] = {},
               ["item"] = ""
             })
     end
 
-    rawset(item.attachments["slot_gear_head"], "item" , custom_head_gear)
+    rawset(source_item.attachments["slot_gear_head"], "item" , custom_head_gear)
 
-    return item
+    rawset(source_item, "hide_eyebrows", custom_head_gear.hide_eyebrows)
+    rawset(source_item, "hide_beard", custom_head_gear.hide_beard)
+    rawset(source_item, "mask_hair", custom_head_gear.mask_hair)
+    rawset(source_item, "mask_facial_hair", custom_head_gear.mask_facial_hair)
+
+
+    local hide_hair = false
+
+    if mod.current_slots_data.gear_customization_data then
+      local head_gead_data = mod.current_slots_data.gear_customization_data[custom_head_gear.name]
+
+      if head_gead_data then
+        hide_hair = head_gead_data.hide_hair
+      end
+    end
+
+    if hide_hair == nil then
+      hide_hair = mod:current_head_gear_hide_hair() --custom_head_gear.mask_hair == "" and table.contains(custom_head_gear.hide_slots or {}, "slot_body_hair")
+    end
+
+    if hide_hair then
+      rawset(source_item.attachments, "slot_body_hair" ,
+      {
+        children = {},
+        item = "",
+      })
+    else
+      local player = Managers.player:local_player_safe(1)
+      local loadout = player:profile().loadout
+
+      rawset(source_item.attachments, "slot_body_hair" ,
+      {
+        children = { loadout["slot_body_hair_color"], },
+        item = loadout["slot_body_hair"],
+      })
+    end
+
+    return source_item
   end
 
   local slot_data = mod.current_slots_data[slot_name]
@@ -99,10 +134,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     return source_item
   end
 
-  local source_item = source_item
   local master_item = table.clone(MasterItems.get_item(source_item.name))
-
-
   local skip_attachments = false
   local has_custom_attach_material = false
   local attachments = {}
@@ -335,18 +367,22 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       rawset(source_item, "mask_hair", customization_data.mask_hair)
       rawset(source_item, "mask_facial_hair", customization_data.mask_facial_hair)
 
-
       if source_item.base_unit == "content/characters/empty_item/empty_item" then
         rawset(source_item, "base_unit", "content/characters/player/human/third_person/base_gear_rig")
         rawset(source_item.resource_dependencies, "content/characters/player/human/third_person/base_gear_rig", true)
       end
-      -- local hide_slots = {}
 
-      -- if customization_data.hide_hair then
-      --  table.insert(hide_slots, "slot_body_hair")
-      -- end
+      local hide_slots = {}
 
-      -- rawset(source_item, "hide_slots", hide_slots)
+      if customization_data.hide_hair == nil then
+        customization_data.hide_hair = mod:current_head_gear_hide_hair()
+      end
+
+      if customization_data.hide_hair then
+        table.insert(hide_slots, "slot_body_hair")
+      end
+
+      rawset(source_item, "hide_slots", hide_slots)
     end
   end
 
@@ -388,7 +424,7 @@ mod.gear_custom_to_str = function(self, item_data)
     str = str.."hide_legs;"..tostring(item_data.hide_legs).."###"
   elseif item_data.slot == "slot_gear_head" then
     str = str.."hide_eyebrows;"..tostring(item_data.hide_eyebrows).."###"
-    if item_data.hide_hair then
+    if item_data.hide_hair ~= nil then
       str = str.."hide_hair;"..tostring(item_data.hide_hair).."###"
     end
     str = str.."hide_beard;"..tostring(item_data.hide_beard).."###"
@@ -530,6 +566,7 @@ mod.load_slot_data = function(self, slot)
       data.hide_beard = master_item.hide_beard or false
       data.mask_hair = master_item.mask_hair
       data.mask_facial_hair = master_item.mask_facial_hair
+      data.hide_hair = data.mask_hair == ""
     end
 
     data.attachments = {}
@@ -559,9 +596,9 @@ mod.show_body_slot = function(self, visual_loadout_extension)
     return false
   end
 
-	if mod.current_slots_data["shirtless"] then
-		return true
-	end
+  if mod.current_slots_data["shirtless"] then
+    return true
+  end
 
   if visual_loadout_extension then
     local slot = visual_loadout_extension._equipment["slot_gear_upperbody"]
@@ -576,7 +613,7 @@ mod.show_body_slot = function(self, visual_loadout_extension)
     end
   end
 
-	return false
+  return false
 end
 
 mod.show_arms_slot = function(self, visual_loadout_extension)
@@ -584,9 +621,9 @@ mod.show_arms_slot = function(self, visual_loadout_extension)
     return false
   end
 
-	if mod.current_slots_data["shirtless"] then
-		return true
-	end
+  if mod.current_slots_data["shirtless"] then
+    return true
+  end
 
   if visual_loadout_extension then
     local slot = visual_loadout_extension._equipment["slot_gear_upperbody"]
@@ -601,7 +638,7 @@ mod.show_arms_slot = function(self, visual_loadout_extension)
     end
   end
 
-	return false
+  return false
 end
 
 mod.show_legs_slot = function(self, visual_loadout_extension)
@@ -609,9 +646,9 @@ mod.show_legs_slot = function(self, visual_loadout_extension)
     return false
   end
 
-	if mod.current_slots_data["pantless"] then
-		return true
-	end
+  if mod.current_slots_data["pantless"] then
+    return true
+  end
 
   if visual_loadout_extension then
     local slot = visual_loadout_extension._equipment["slot_gear_lowerbody"]
@@ -626,7 +663,7 @@ mod.show_legs_slot = function(self, visual_loadout_extension)
     end
   end
 
-	return false
+  return false
 end
 
 mod.current_head_gear_hide_hair = function()
@@ -636,6 +673,10 @@ mod.current_head_gear_hide_hair = function()
     local head_slot = vle._equipment["slot_gear_head"]
 
     if head_slot and head_slot.item then
+      if head_slot.item.name == "content/items/characters/player/human/gear_head/empty_headgear" or head_slot.item.mask_hair ~= "" then
+        return false
+      end
+
       for k,v in pairs(head_slot.item.hide_slots or {}) do
         if v == "slot_body_hair" then
           return true

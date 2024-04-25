@@ -29,73 +29,10 @@ mod.customizable_slots =
   "slot_gear_extra_cosmetic",
 }
 
-mod.human_hair_masks =
-{
-	"hair_no_mask",
-	"hair_mask_underside_back_01",
-	"hair_mask_underside_back_02",
-	"hair_mask_half_left_01",
-	"hair_mask_half_right_01",
-	"hair_mask_half_right_02",
-	"hair_mask_back",
-	"hair_mask_back_big",
-	"hair_mask_back_top",
-	"hair_mask_backside_02",
-	"hair_mask_fringe_big",
-	"hair_mask_fringe",
-	"hair_mask_fringe_tight",
-	"hair_mask_fringe_inverted",
-	"hair_mask_top",
-	"hair_mask_top_bigger",
-	"hair_mask_top_big",
-	"hair_mask_top_big_01",
-	"hair_mask_back_01",
-	"hair_mask_shrink_01",
-	"hair_mask_shrink_02",
-}
-
-mod.human_face_hair_masks =
-{
-	"facial_hair_no_mask",
-	"facial_hair_mask_neck_01",
-	"facial_hair_mask_chin_strap_01",
-	"facial_hair_mask_chin_01",
-	"facial_hair_mask_chin_sides_01",
-	"facial_hair_mask_chin_sides_02",
-	"facial_hair_mask_chin_sides_03",
-	"facial_hair_mask_sides_01",
-	"facial_hair_mask_sides_02",
-	"facial_hair_keep_small_sideburns_01",
-	"facial_hair_keep_small_sideburns_02",
-	"facial_hair_mask_underside_01",
-}
-
-mod.ogryn_hair_masks =
-{
-	"hair_no_mask",
-	"ogryn_hair_mask_fringe",
-	"ogryn_hair_mask_back_01",
-	"ogryn_hair_mask_beret",
-	"ogryn_hair_mask_cap_01",
-	"ogryn_hair_mask_cap_02",
-	"ogryn_hair_mask_top_01",
-	"ogryn_hair_mask_top_02",
-	"ogryn_hair_mask_half_left",
-	"ogryn_hair_mask_half_right",
-	"ogryn_hair_mask_half_right_02",
-}
-
-mod.ogryn_face_hair_masks =
-{
-	"facial_hair_no_mask",
-	"ogryn_facial_hair_mask_sides_01",
-	"ogryn_facial_hair_mask_sides_02",
-	"ogryn_facial_hair_mask_sides_03",
-	"ogryn_facial_hair_mask_chin_strap_01",
-	"ogryn_facial_hair_mask_chin_strap_02",
-	"ogryn_facial_hair_keep_small_sideburns_01",
-	"ogryn_facial_hair_keep_small_sideburns_02",
-}
+mod.human_hair_masks = {}
+mod.human_face_hair_masks = {}
+mod.ogryn_hair_masks = {}
+mod.ogryn_face_hair_masks = {}
 
 mod.masks_per_slots = {}
 mod.masks_per_slots["slot_body_torso"] =
@@ -166,6 +103,36 @@ local decal_material_types =
 	"coated",
 	"oxidized"
 }
+
+mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_hair_headgear_mask", function(instance)
+	if instance then
+		for k,v in pairs(instance) do
+			if not string.match(k, "debug") then
+				if string.starts_with(k, "facial_hair_") then
+					table.insert(mod.human_face_hair_masks, k)
+				elseif string.starts_with(k, "hair_") and k ~= "hair_no_mask" then -- default already added
+					table.insert(mod.human_hair_masks, k)
+				elseif string.starts_with(k, "ogryn_facial_hair") then
+					table.insert(mod.ogryn_face_hair_masks, k)
+				elseif string.starts_with(k, "ogryn_hair_") then
+					table.insert(mod.ogryn_hair_masks, k)
+				end
+			end
+		end
+	end
+
+  table.sort(mod.human_hair_masks)
+  table.sort(mod.human_face_hair_masks)
+  table.sort(mod.ogryn_hair_masks)
+  table.sort(mod.ogryn_face_hair_masks)
+
+  -- add the default ones in the first spot
+  table.insert(mod.human_hair_masks, 1, "hair_no_mask")
+  table.insert(mod.human_face_hair_masks, 1, "facial_hair_no_mask")
+  table.insert(mod.ogryn_hair_masks, 1, "hair_no_mask")
+  table.insert(mod.ogryn_face_hair_masks, 1, "facial_hair_no_mask")
+end)
+
 
 mod:hook_require("scripts/settings/equipment/item_material_overrides/item_material_overrides_gear_colors", function(instance)
 	if instance then

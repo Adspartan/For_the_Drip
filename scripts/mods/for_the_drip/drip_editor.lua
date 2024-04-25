@@ -21,19 +21,19 @@ end
 
 -- todo: checkbox or toggle in the settings
 mod:hook("UIManager", "using_input", function(func, ...)
-	return show_editor or func(...)
+  return show_editor or func(...)
 end)
 
 local ImguiDripEditor = class("ImguiDripEditor")
 local editor = ImguiDripEditor:new()
 
 ImguiDripEditor.open = function(self)
-	if not Managers.input:cursor_active() then
-		Managers.input:push_cursor(self.__class_name)
-	end
+  if not Managers.input:cursor_active() then
+    Managers.input:push_cursor(self.__class_name)
+  end
 
   show_editor = true
-	Imgui.open_imgui()
+  Imgui.open_imgui()
 end
 
 ImguiDripEditor.update = function(self)
@@ -50,15 +50,15 @@ ImguiDripEditor.update = function(self)
     Imgui.set_next_window_pos(25,25)
   end
 
-	local _, closed = Imgui.begin_window("Drip Editor", "always_auto_resize")
+  local _, closed = Imgui.begin_window("Drip Editor", "always_auto_resize")
 
-	if closed then
-		self:close()
-	else
-		self:ui_content()
-	end
+  if closed then
+    self:close()
+  else
+    self:ui_content()
+  end
 
-	Imgui.end_window()
+  Imgui.end_window()
 end
 
 mod.selected_color_material = "none"
@@ -212,14 +212,14 @@ ImguiDripEditor.slot_customization_ui = function(self)
         end
 
         if mod.selected_unit_slot == "slot_gear_head" then
-          -- if data.hide_hair == nil then
-          --   data.hide_hair = mod:current_head_gear_hide_hair()
-          -- end
+          if data.hide_hair == nil then
+            data.hide_hair = mod:current_head_gear_hide_hair()
+          end
 
-          -- Imgui.spacing()
-          -- Imgui.same_line()
-          -- data.hide_hair = Imgui.checkbox("Hide Hair##hide_hair_btn", data.hide_hair)
-          -- Imgui.same_line()
+          Imgui.spacing()
+          Imgui.same_line()
+          data.hide_hair = Imgui.checkbox("Hide Hair##hide_hair_btn", data.hide_hair)
+          Imgui.same_line()
           Imgui.spacing()
           Imgui.same_line()
           data.hide_beard = Imgui.checkbox("Hide Beard##hide_beard_btn", data.hide_beard)
@@ -707,28 +707,28 @@ end
 
 
 ImguiDripEditor.close = function(self)
-	if Managers.input:cursor_active() then
-		Managers.input:pop_cursor(self.__class_name)
-	end
+  if Managers.input:cursor_active() then
+    Managers.input:pop_cursor(self.__class_name)
+  end
 
-	show_editor = false
-	Imgui.close_imgui()
+  show_editor = false
+  Imgui.close_imgui()
 end
 
 mod.toggle_ui = function()
-	if show_editor then
-		editor:close()
-	else
-		editor:open()
+  if show_editor then
+    editor:close()
+  else
+    editor:open()
 
     if (not mod.attachment_per_slot_per_breed) and (not mod.is_fetching_attachments) then
       mod:fetch_avaiable_attachment_per_slot_per_breed()
     end
-	end
+  end
 end
 
 mod.update = function()
-	if show_editor then
-		editor:update()
-	end
+  if show_editor then
+    editor:update()
+  end
 end
