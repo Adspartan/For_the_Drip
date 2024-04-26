@@ -113,6 +113,102 @@ end
 
 mod.selected_unit_slot = "none"
 mod.selected_extra_attach = ""
+mod.selected_hair_color_index = 1
+
+ImguiDripEditor.body_customization_ui = function(self)
+  local x = Imgui.get_window_size()
+  local data = mod.current_slots_data.body_customization_data
+
+  if (not data) or type(data) == "string" then
+    mod.current_slots_data.body_customization_data = {}
+    data = mod.current_slots_data.body_customization_data
+  end
+
+  if data.use_custom_hair_color == nil then
+    data["use_custom_hair_color"] = false
+    data["custom_hair_color"] = ""
+  end
+
+  body_options_header = Imgui.collapsing_header("Body Options", body_options_header)
+
+  if body_options_header == false then
+    return
+  end
+
+  if not data["shirtless"] then
+    data["shirtless"] = false
+  end
+  if not data["pantless"] then
+    data["pantless"] = false
+  end
+
+  Imgui.spacing()
+  Imgui.same_line()
+  data["shirtless"] = Imgui.checkbox("Shirtless ", data["shirtless"])
+  Imgui.same_line()
+  Imgui.spacing()
+  Imgui.same_line()
+  data["pantless"] = Imgui.checkbox("Pantless", data["pantless"])
+
+  Imgui.spacing()
+  Imgui.same_line()
+
+  data.use_custom_hair_color = Imgui.checkbox("Use Custom Hair Color", data.use_custom_hair_color)
+
+  if data.use_custom_hair_color then
+    Imgui.spacing()
+    Imgui.same_line()
+
+    if Imgui.begin_combo("Hair Color", data.custom_hair_color) then
+      for k,v in pairs(mod.available_colors) do
+        if Imgui.selectable(v, v == data.custom_hair_color) then
+          mod.selected_hair_color_index = k
+          data.custom_hair_color = v
+        end
+      end
+
+      Imgui.end_combo()
+    end
+
+    Imgui.same_line()
+    Imgui.spacing()
+    Imgui.same_line()
+
+    if Imgui.button("<##hair_color") then
+      mod.selected_hair_color_index = mod.selected_hair_color_index - 1
+
+      if mod.selected_hair_color_index <= 0 then
+        mod.selected_hair_color_index = #mod.available_colors
+      end
+
+      data.custom_hair_color = mod.available_colors[mod.selected_hair_color_index]
+      mod:save_current_loadout()
+      mod:refresh_all_gear_slots()
+    end
+
+    Imgui.same_line()
+
+    if Imgui.button(">##hair_color") then
+      mod.selected_hair_color_index = mod.selected_hair_color_index + 1
+
+      if mod.selected_hair_color_index > #mod.available_colors then
+        mod.selected_hair_color_index = 1
+      end
+
+      data.custom_hair_color = mod.available_colors[mod.selected_hair_color_index]
+      mod:save_current_loadout()
+      mod:refresh_all_gear_slots()
+    end
+  end
+
+  Imgui.spacing()
+  Imgui.same_line()
+
+  if Imgui.button("Apply##body_option_btn", x-35) then
+    mod:save_current_loadout()
+    mod:refresh_all_gear_slots()
+  end
+end
 
 ImguiDripEditor.slot_customization_ui = function(self)
   local x = Imgui.get_window_size()
@@ -585,33 +681,7 @@ ImguiDripEditor.ui_content = function(self)
     Imgui.separator()
   end
 
-  body_options_header = Imgui.collapsing_header("Body Options", body_options_header)
-
-  if body_options_header then
-    if not mod.current_slots_data["shirtless"] then
-      mod.current_slots_data["shirtless"] = false
-    end
-    if not mod.current_slots_data["pantless"] then
-      mod.current_slots_data["pantless"] = false
-    end
-
-    Imgui.spacing()
-    Imgui.same_line()
-    mod.current_slots_data["shirtless"] = Imgui.checkbox("Shirtless ", mod.current_slots_data["shirtless"])
-    Imgui.same_line()
-    Imgui.spacing()
-    Imgui.same_line()
-    mod.current_slots_data["pantless"] = Imgui.checkbox("Pantless", mod.current_slots_data["pantless"])
-
-    Imgui.same_line()
-    Imgui.spacing()
-    Imgui.same_line()
-
-    if Imgui.button("Apply##shirtless_btn", x/3-20) then
-      mod:save_current_loadout()
-      mod:refresh_all_gear_slots()
-    end
-  end
+  self:body_customization_ui()
 
   self:slot_customization_ui()
 

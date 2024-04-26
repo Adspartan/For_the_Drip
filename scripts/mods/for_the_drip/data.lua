@@ -1,6 +1,7 @@
 local mod = get_mod("for_the_drip")
 
 local ItemMaterialOverrides = require("scripts/settings/equipment/item_material_overrides/item_material_overrides")
+local Promise = require("scripts/foundation/utilities/promise")
 
 --------------------
 -- slot_weapon_skin
@@ -70,6 +71,8 @@ mod.masks_per_slots["slot_body_arms"] =
   "mask_arms_hands_keep_wrist"
 }
 
+mod.available_colors = {}
+mod.available_colors_textures = {}
 
 local decal_table =
 {
@@ -144,7 +147,6 @@ mod:hook_require("scripts/settings/equipment/item_material_overrides/player_mate
   table.insert(mod.ogryn_face_hair_masks, 1, "facial_hair_no_mask")
 end)
 
-
 mod:hook_require("scripts/settings/equipment/item_material_overrides/item_material_overrides_gear_colors", function(instance)
   if instance then
     mod.color_materials = {}
@@ -153,10 +155,39 @@ mod:hook_require("scripts/settings/equipment/item_material_overrides/item_materi
       if not string.match(k, "debug") then
         table.insert(mod.color_materials, k)
       end
+
+      for t, texture in pairs(v.texture_overrides or {}) do
+        local index = mod:shorten_item_name(texture["resource"])
+
+        if not mod.available_colors_textures[index] then
+          table.insert(mod.available_colors, index)
+          mod.available_colors_textures[index] = texture["resource"]
+        end
+      end
     end
   end
 
+  -- give it some time to finish loading everything
+  Promise.delay(0.5):next(function()
+    table.sort(mod.available_colors)
+  end)
+
   table.sort(mod.color_materials)
+end)
+
+mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_hair_colors", function(instance)
+  if instance then
+    for k,v in pairs(instance) do
+      for t, texture in pairs(v.texture_overrides or {}) do
+        local index = mod:shorten_item_name(texture["resource"])
+
+         if not mod.available_colors_textures[index] then
+          table.insert(mod.available_colors, index)
+          mod.available_colors_textures[index] = texture["resource"]
+        end
+      end
+    end
+  end
 end)
 
 mod:hook_require("scripts/settings/equipment/item_material_overrides/item_material_overrides_gear_patterns", function(instance)

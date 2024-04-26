@@ -252,6 +252,8 @@ mod:hook(CLASS.UIProfileSpawner, "spawn_profile", function(func, self, profile, 
     mod:persistent_table("data").breed = breed_name
     mod:persistent_table("data").gender = profile.gender
 
+    loadout["slot_body_hair_color"] = mod:make_custom_item("slot_body_hair_color", loadout["slot_body_hair_color"])
+
     loadout["slot_gear_head"] = mod:make_custom_item("slot_gear_head", loadout["slot_gear_head"])
     loadout["slot_gear_upperbody"] = mod:make_custom_item("slot_gear_upperbody", loadout["slot_gear_upperbody"])
     loadout["slot_gear_lowerbody"] = mod:make_custom_item("slot_gear_lowerbody", loadout["slot_gear_lowerbody"])

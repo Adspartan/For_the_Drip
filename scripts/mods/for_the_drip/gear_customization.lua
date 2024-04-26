@@ -65,9 +65,30 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     return nil
   end
 
+  local body_data = mod.current_slots_data.body_customization_data
+
+  if slot_name == "slot_body_face" or slot_name == "slot_body_hair_color" then
+    if body_data.use_custom_hair_color and body_data.custom_hair_color ~= "" then
+      local mat_name = "hair_color_custom"
+
+      ItemMaterialOverrides[mat_name] = {
+        texture_overrides = {
+          hair_color_gradient = {
+            resource = mod.available_colors_textures[body_data.custom_hair_color]
+          }
+        },
+	    }
+
+      rawset(source_item, "material_overrides", {"hair_color_custom"})
+    else
+      rawset(source_item, "material_overrides", {})
+    end
+  end
+
   if slot_name == "slot_body_face" then
     local gear_head_item = source_item.attachments and source_item.attachments["slot_gear_head"] and source_item.attachments["slot_gear_head"].item or table.clone_instance(MasterItems.get_item("content/items/characters/player/human/gear_head/empty_headgear"))
     local custom_head_gear = mod:make_custom_item("slot_gear_head", gear_head_item)
+
 
     if not source_item.attachments then
       rawset(source_item, "attachments", {})
@@ -88,7 +109,6 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     rawset(source_item, "mask_hair", custom_head_gear.mask_hair)
     rawset(source_item, "mask_facial_hair", custom_head_gear.mask_facial_hair)
     rawset(source_item, "mask_face", custom_head_gear.mask_face)
-
 
     local hide_hair = false
 
@@ -322,7 +342,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   end
 
   if slot_name == "slot_gear_upperbody" then
-    if mod.current_slots_data["shirtless"] then
+    if body_data["shirtless"] then
       rawset(source_item, "mask_torso", "mask_default")
       rawset(source_item, "mask_arms", "mask_default")
       rawset(source_item, "hide_slots", {})
@@ -344,7 +364,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       rawset(source_item, "hide_slots", hide_slots)
     end
   elseif slot_name == "slot_gear_lowerbody" then
-    if mod.current_slots_data["pantless"] then
+    if body_data["pantless"] then
       rawset(source_item, "mask_legs", "mask_default")
       rawset(source_item, "hide_slots", {})
       rawset(source_item, "attachments", {})
@@ -601,7 +621,7 @@ mod.show_body_slot = function(self, visual_loadout_extension)
     return false
   end
 
-  if mod.current_slots_data["shirtless"] then
+  if mod.current_slots_data.body_customization_data["shirtless"] then
     return true
   end
 
@@ -626,7 +646,7 @@ mod.show_arms_slot = function(self, visual_loadout_extension)
     return false
   end
 
-  if mod.current_slots_data["shirtless"] then
+  if mod.current_slots_data.body_customization_data["shirtless"] then
     return true
   end
 
@@ -651,7 +671,7 @@ mod.show_legs_slot = function(self, visual_loadout_extension)
     return false
   end
 
-  if mod.current_slots_data["pantless"] then
+  if mod.current_slots_data.body_customization_data["pantless"] then
     return true
   end
 

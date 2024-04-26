@@ -11,8 +11,7 @@ mod.default_slot_data = function()
     slot_primary = {},
     slot_secondary = {},
     gear_customization_data = {},
-    shirtless = false,
-    pantless = false
+    body_customization_data = {},
   }
 end
 
@@ -89,12 +88,12 @@ local loadout_to_string = function(loadout)
   local str = ""
 
   for slot, slot_data in pairs(loadout) do
-    if not string.match(slot, "slot_") and slot ~= "gear_customization_data" then
+    if not string.match(slot, "slot_") and slot ~= "gear_customization_data" and slot ~= "body_customization_data" then
       if str ~= "" then
         str = str.."###"
       end
       str = str..slot.."###"..tostring(slot_data)
-    elseif slot ~= "gear_customization_data" then
+    elseif slot ~= "gear_customization_data" and slot ~= "body_customization_data" then
       local data_str = slot_data_to_str(slot_data)
 
       if data_str ~= "" then
@@ -124,7 +123,43 @@ local loadout_to_string = function(loadout)
 
         str = str.. mod:gear_custom_to_str(item_data)
       end
+
+      if table.size(gcd) == 0 then
+        str = str.."false"
+      end
+    else
+      str = str.."false"
     end
+  else
+    str = str.."#####false"
+  end
+
+  if loadout.body_customization_data then
+    local bcd = loadout.body_customization_data
+
+    if type(bcd) == "table" then
+      local first = true
+
+      str = str.."#####"
+
+      for name, value in pairs(bcd) do
+        if not first then
+          str = str.."###"
+        else
+          first = false
+        end
+
+        str = str.. name..";"..tostring(value)
+      end
+
+      if table.size(bcd) == 0 then
+        str = str.."false"
+      end
+    else
+      str = str.."false"
+    end
+  else
+    str = str.."false"
   end
 
   return str
@@ -169,11 +204,16 @@ end
 local loadout_from_str = function(str)
   local st_1 = nil
   local st_2 = nil
+  local st_3 = nil
 
   if string.find(str, "#####") then
     local tab = mod:split_str(str, "#####")
     st_1 = tab[1]
     st_2 = tab[2]
+
+    if table.size(tab) > 2 then
+      st_3 = tab[3]
+    end
   else
     st_1 = str
   end
@@ -187,7 +227,7 @@ local loadout_from_str = function(str)
 
     if not string.find(slot, "slot_") then
       if slot == "shirtless" or slot == "pantless" then
-        loadout[slot] = data == "true"
+        loadout.body_customization_data[slot] = data == "true"
       else
         loadout[slot] = data
       end
@@ -214,6 +254,22 @@ local loadout_from_str = function(str)
             loadout.gear_customization_data[item_custom.item] = item_custom
           end
         end
+      end
+    end
+  end
+
+  if st_3 and st_3 ~= "" and st_3 ~= "false" then
+    local body_tab = mod:split_str(st_3, "###")
+
+    for k, v in pairs(body_tab) do
+      local split = mod:split_str(v, ";")
+
+      local key = split[1]
+      local value = split[2]
+      if value == "false" or value == "true" then
+        loadout.body_customization_data[key] = value == "true"
+      else
+        loadout.body_customization_data[key] = value
       end
     end
   end

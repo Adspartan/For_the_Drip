@@ -13,11 +13,10 @@ if not _os.initialized then
   _os = dmf.deepcopy(Mods.lua.os)
 end
 
-local directory = nil
-
 mod.setup_output_folder = function()
-  directory = _os.getenv('APPDATA').."/Fatshark/Darktide/for_the_drip/"
-  _os.execute("mkdir " .. "\"" .. directory .. "\" 2>nul")
+  local directory = _os.getenv('APPDATA').."/Fatshark/Darktide/for_the_drip/"
+  mod:persistent_table("data").directory = directory
+  _os.execute("mkdir " .. "\"" .. mod:persistent_table("data").directory .. "\" 2>nul")
 end
 
 mod.append_to_file = function(line, filename)
@@ -25,7 +24,7 @@ mod.append_to_file = function(line, filename)
     return
   end
 
-  local file = assert(_io.open(directory .. filename .. ".txt", "a"))
+  local file = assert(_io.open(mod:persistent_table("data").directory .. filename .. ".txt", "a"))
 
   file:write(line.."\n")
   file:close()
@@ -42,7 +41,7 @@ mod.dump_table_keys_to_file = function(table, filename, append)
     mode = "a"
   end
 
-  local file = assert(_io.open(directory .. filename .. ".txt", mode))
+  local file = assert(_io.open(mod:persistent_table("data").directory .. filename .. ".txt", mode))
 
   for key,_  in pairs(table) do
     file:write(key.."\n")
@@ -62,7 +61,7 @@ mod.dump_table_values_to_file = function(table, filename, append)
     mode = "a"
   end
 
-  local file = assert(_io.open(directory .. filename .. ".txt", mode))
+  local file = assert(_io.open(mod:persistent_table("data").directory .. filename .. ".txt", mode))
 
   for k,v  in pairs(table) do
     file:write(v.."\n")
@@ -82,7 +81,7 @@ mod.dump_table_to_file = function(self, t, depth, filename, append)
     mode = "a"
   end
 
-  local file = assert(_io.open(directory .. filename .. ".lua", mode))
+  local file = assert(_io.open(mod:persistent_table("data").directory .. filename .. ".lua", mode))
 
   file:write(mod:table_tostring(t, depth).."\n")
 
@@ -90,7 +89,7 @@ mod.dump_table_to_file = function(self, t, depth, filename, append)
 end
 
 mod.file_exist = function(file)
-  local f = _io.open(directory..file, "r")
+  local f = _io.open(mod:persistent_table("data").directory..file, "r")
 
   if f then
     _io.close(f)
@@ -101,5 +100,5 @@ mod.file_exist = function(file)
 end
 
 mod.read_all_lines = function(file)
-  return _io.lines(directory..file)
+  return _io.lines(mod:persistent_table("data").directory..file)
 end
