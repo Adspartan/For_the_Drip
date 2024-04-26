@@ -284,46 +284,46 @@ end
 mod:hook_safe(CLASS.CosmeticsVendorView, "on_enter", function(self)
   -- todo: allow preview when equipped on character
   mod:hook_disable(CLASS.UIWeaponSpawner, "_spawn_weapon")
-  mod:hook_disable(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_change_slot_item")
 
-  mod:hook_disable(CLASS.UIProfileSpawner, "_spawn_character_profile")
+  mod:hook_disable(CLASS.UIProfileSpawner, "spawn_profile")
 end)
 
 mod:hook_safe(CLASS.CosmeticsVendorView, "on_exit", function(self)
   mod:hook_enable(CLASS.UIWeaponSpawner, "_spawn_weapon")
-  mod:hook_enable(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_change_slot_item")
 
-  mod:hook_enable(CLASS.UIProfileSpawner, "_spawn_character_profile")
+  mod:hook_enable(CLASS.UIProfileSpawner, "spawn_profile")
 end)
 
 mod:hook_safe(CLASS.StoreItemDetailView, "on_enter", function(self)
   -- todo: allow preview when equipped on character
   mod:hook_disable(CLASS.UIWeaponSpawner, "_spawn_weapon")
-  mod:hook_disable(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_change_slot_item")
 
-  mod:hook_disable(CLASS.UIProfileSpawner, "_spawn_character_profile")
+  mod:hook_disable(CLASS.UIProfileSpawner, "spawn_profile")
 end)
 
 mod:hook_safe(CLASS.StoreItemDetailView, "on_exit", function(self)
   mod:hook_enable(CLASS.UIWeaponSpawner, "_spawn_weapon")
-  mod:hook_enable(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_change_slot_item")
 
-  mod:hook_enable(CLASS.UIProfileSpawner, "_spawn_character_profile")
+  mod:hook_enable(CLASS.UIProfileSpawner, "spawn_profile")
 end)
 
 mod:hook_safe(CLASS.StoreView, "on_enter", function(self)
   -- todo: allow preview when equipped on character
   mod:hook_disable(CLASS.UIWeaponSpawner, "_spawn_weapon")
-  mod:hook_disable(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_change_slot_item")
 
-  mod:hook_disable(CLASS.UIProfileSpawner, "_spawn_character_profile")
+  mod:hook_disable(CLASS.UIProfileSpawner, "spawn_profile")
 end)
 
 mod:hook_safe(CLASS.StoreView, "on_exit", function(self)
   mod:hook_enable(CLASS.UIWeaponSpawner, "_spawn_weapon")
-  mod:hook_enable(CLASS.UIProfileSpawner, "_equip_item_for_spawn_character")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_change_slot_item")
 
-  mod:hook_enable(CLASS.UIProfileSpawner, "_spawn_character_profile")
+  mod:hook_enable(CLASS.UIProfileSpawner, "spawn_profile")
 end)
 
 local ItemSlotSettings = require("scripts/settings/item/item_slot_settings")
