@@ -84,9 +84,7 @@ mod:hook(CLASS.PlayerUnitVisualLoadoutExtension, "server_correction_occurred", f
 
         local optional_existing_unit_3p = config.use_existing_unit_3p and wieldable_slot_component.existing_unit_3p
 
-        mod:load_item_packages(item, function()
-          self:_equip_item_to_slot(item, slot_name, mispredicted_frame_t, optional_existing_unit_3p, from_server_correction_occurred)
-        end)
+        self:_equip_item_to_slot(item, slot_name, mispredicted_frame_t, optional_existing_unit_3p, from_server_correction_occurred)
       end
     end
   end

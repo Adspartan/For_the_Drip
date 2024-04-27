@@ -65,6 +65,12 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     return nil
   end
 
+  local should_edit = slot_name == "slot_primary" or slot_name == "slot_secondary" or string.find(slot_name, "slot_body_") or string.find(slot_name, "slot_gear_")
+
+  if not should_edit then
+    return source_item
+  end
+
   local body_data = mod.current_slots_data.body_customization_data
 
   if slot_name == "slot_body_face" or slot_name == "slot_body_hair_color" then
