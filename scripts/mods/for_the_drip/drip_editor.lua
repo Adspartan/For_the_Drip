@@ -67,6 +67,7 @@ mod.selected_gear_material = "none"
 mod.selected_preset = "none"
 mod.selected_preset_name = "none"
 mod.attachment_filter = ""
+mod.selected_attachment_index = 0
 local selected_preset_index = 0
 
 local color_index = 1
@@ -225,9 +226,23 @@ ImguiDripEditor.slot_customization_ui = function(self)
   local visual_loadout_extension = mod:get_visual_loadout_extension()
 
   if Imgui.begin_combo("Slot##customizable_slot_btn", mod.selected_unit_slot) then
+    local old_selected_slot = mod.selected_unit_slot
+
     for k,slot in pairs(mod.customizable_slots) do
       if Imgui.selectable(slot, slot == mod.selected_unit_slot)  then
         mod.selected_unit_slot = slot
+
+        if old_selected_slot ~= slot then
+          mod:reset_selected_attachment()
+
+          if old_selected_slot ~= "none" then
+            if old_selected_slot == "slot_gear_head" then
+              mod:refresh_slot("slot_body_face")
+            else
+              mod:refresh_slot(old_selected_slot)
+            end
+          end
+        end
 
         if slot ~= "none" then
           if visual_loadout_extension then
@@ -423,7 +438,13 @@ ImguiDripEditor.slot_customization_ui = function(self)
           Imgui.separator()
           Imgui.spacing()
           Imgui.same_line()
+
+          local old_filter = mod.attachment_filter
           mod.attachment_filter = Imgui.input_text("Filter", mod.attachment_filter)
+
+          if old_filter ~= mod.attachment_filter then
+            mod.selected_attachment_index = 0
+          end
 
           Imgui.spacing()
           Imgui.same_line()
@@ -431,21 +452,48 @@ ImguiDripEditor.slot_customization_ui = function(self)
           if Imgui.begin_combo("Extra Attachment", mod.selected_extra_attach) then
             local breed = mod:persistent_table("data").breed
             local t = mod.attachment_per_slot_per_breed[breed] and mod.attachment_per_slot_per_breed[breed][mod.selected_unit_slot] or {}
-            local item_to_load = nil
+
+            local index = 0
 
             for k, attach in pairs(t) do
               if mod.attachment_filter == "" or string.find(attach, mod.attachment_filter) then
+                index = index + 1
+
                 if Imgui.selectable(attach, attach == mod.selected_extra_attach) then
                   mod.selected_extra_attach = attach
-                  item_to_load = attach
+                  mod.selected_attachment_index = index
+
+                  mod:preview_attachment(attach)
                 end
               end
             end
 
             Imgui.end_combo()
+          else
+            Imgui.same_line()
+            Imgui.spacing()
+            Imgui.same_line()
 
-            if item_to_load then
-              mod:load_item_packages(MasterItems.get_item(item_to_load))
+            if Imgui.button("<##previous_attachment_btn") then
+              if mod.selected_attachment_index > 1 then
+                mod.selected_attachment_index = mod.selected_attachment_index - 1
+                mod:update_preview_attachment_index()
+              end
+            end
+
+            Imgui.same_line()
+
+            if Imgui.button(">##next_attachment_btn") then
+              mod.selected_attachment_index = mod.selected_attachment_index + 1
+              mod:update_preview_attachment_index()
+            end
+
+            Imgui.same_line()
+            Imgui.spacing()
+            Imgui.same_line()
+
+            if Imgui.button("x##clear_attach_name") then
+              mod:reset_selected_attachment()
             end
           end
         end
@@ -749,6 +797,10 @@ ImguiDripEditor.ui_content = function(self)
     Imgui.spacing()
     Imgui.same_line()
     mod:set("apply_mat_on_index_change", Imgui.checkbox(mod:localize("apply_mat_on_index_change"), mod:get("apply_mat_on_index_change")))
+
+    Imgui.spacing()
+    Imgui.same_line()
+    mod:set("preview_attachments", Imgui.checkbox(mod:localize("preview_attachments"), mod:get("preview_attachments")))
 
     Imgui.separator()
   end

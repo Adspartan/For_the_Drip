@@ -158,6 +158,24 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   end
 
   if (not customization_data) and (not slot_data) then
+    if mod.selected_unit_slot == slot_name and mod.selected_extra_attach ~= "" then
+      if not source_item.attachments then
+        rawset(source_item, "attachments", {})
+      end
+
+      local attach_count = table.size(source_item.attachments)
+      local attach_name = "attachment_"..(attach_count+1)
+
+      source_item.attachments[attach_name] =
+      {
+        ["children"] = {},
+        ["material_overrides"] = {},
+        ["item"] = mod.selected_extra_attach,
+        ["is_extra"] = true,
+        ["is_preview"] = true,
+      }
+    end
+
     return source_item
   end
 
@@ -199,6 +217,9 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       rawset(source_item, "attachments", {})
     else
       -- reset extra attachments in case they got removed
+
+      local attach_count = 0
+
       for name, att_data in pairs(source_item.attachments) do
         if att_data.is_extra then
           source_item.attachments[name] =
@@ -208,11 +229,12 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
             ["item"] = "",
             ["is_extra"] = true,
           }
+        else -- only count the original attachments
+          attach_count = attach_count + 1
         end
       end
     end
-    -- to account for the added attachment, check the saved data first if available
-    local attach_count = table.size(customization_data and customization_data.attachments or source_item.attachments)
+
 
     if customization_data and customization_data.extra_attachments then
       for k, item in pairs(customization_data.extra_attachments) do
@@ -260,6 +282,26 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
       skip_attachments = false
       has_extra_attachment = true
+    end
+
+    attach_count = table.size(source_item.attachments)
+
+    if mod.selected_unit_slot == slot_name and mod.selected_extra_attach ~= "" then
+      if not source_item.attachments then
+        rawset(source_item, "attachments", {})
+      end
+
+      local attach_count = table.size(source_item.attachments)
+      local attach_name = "attachment_"..(attach_count+1)
+
+      source_item.attachments[attach_name] =
+      {
+        ["children"] = {},
+        ["material_overrides"] = {},
+        ["item"] = mod.selected_extra_attach,
+        ["is_extra"] = true,
+        ["is_preview"] = true,
+      }
     end
   end
 
@@ -731,4 +773,58 @@ mod.current_head_gear_hide_hair = function()
   end
 
   return false
+end
+
+mod.reset_selected_attachment = function(self)
+  mod.selected_extra_attach = ""
+  mod.selected_attachment_index = 0
+
+  if mod.selected_unit_slot ~= "none" then
+    mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
+  end
+end
+
+mod.update_preview_attachment_index = function(self)
+  if mod.selected_attachment_index < 1 then
+    mod:reset_selected_attachment()
+  end
+
+  local breed = mod:persistent_table("data").breed
+  local t = mod.attachment_per_slot_per_breed[breed] and mod.attachment_per_slot_per_breed[breed][mod.selected_unit_slot] or {}
+  local index = 0
+  local last_index_found = 0
+  local last_attach_found = ""
+
+  for k, attach in pairs(t) do
+    if mod.attachment_filter == "" or string.find(attach, mod.attachment_filter) then
+      index = index + 1
+      last_index_found = index
+      last_attach_found = attach
+
+      if index == mod.selected_attachment_index then
+        mod.selected_extra_attach = attach
+        mod.selected_attachment_index = index
+
+        mod:preview_attachment(attach)
+        return
+      end
+    end
+  end
+
+  -- index not found, get the highest one found
+  if last_attach_found ~= "" then
+    mod.selected_attachment_index = last_index_found
+    mod:preview_attachment(last_attach_found)
+  else
+    mod:reset_selected_attachment()
+  end
+end
+
+mod.preview_attachment = function(self, item_name)
+  if mod:get("preview_attachments") then
+    mod:load_item_packages(MasterItems.get_item(item_name), function()
+      mod.selected_extra_attach = item_name
+      mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
+    end)
+  end
 end

@@ -23,4 +23,8 @@ return {
   {
     en = "Reset Editor Position",
   },
+  preview_attachments  =
+  {
+    en = "Preview Selected Attachment",
+  },
 }

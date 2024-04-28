@@ -381,6 +381,10 @@ mod.on_all_mods_loaded = function()
   end)
 
   mod:refresh_drip()
+
+  if mod:get("preview_attachments") == nil then
+    mod:set("preview_attachments", true)
+  end
 end
 
 mod.load_extra_packages_if_needed = function(self, item)
