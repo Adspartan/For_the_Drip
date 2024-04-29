@@ -250,9 +250,9 @@ mod.refresh_slot = function(self, slot_name)
       local item = (string.find(slot_name, "_body_")) and table.clone_instance(slot.item) or table.clone(MasterItems.get_item(slot.item.name))
 
       if item then
-        visual_loadout_extension:unequip_item_from_slot(slot_name, t)
         mod:load_item_packages(item, function()
           local t = FixedFrame.get_latest_fixed_time() or 1
+          visual_loadout_extension:unequip_item_from_slot(slot_name, t)
           visual_loadout_extension:equip_item_to_slot(item, slot_name, nil, t)
         end)
       end
@@ -318,13 +318,10 @@ mod.reset_slot = function(self, slot_name)
         local item = table.clone(MasterItems.get_item(slot.item.name))
 
         if item then
-          visual_loadout_extension:unequip_item_from_slot(slot_name, t)
-
           mod:load_item_packages(item, function()
-            mod:load_item_packages(slot.item, function()
-              local t = FixedFrame.get_latest_fixed_time() or 1
-              visual_loadout_extension:equip_item_to_slot(item, slot_name, nil, t)
-            end)
+            local t = FixedFrame.get_latest_fixed_time() or 1
+            visual_loadout_extension:unequip_item_from_slot(slot_name, t)
+            visual_loadout_extension:equip_item_to_slot(item, slot_name, nil, t)
           end)
         end
       end

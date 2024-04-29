@@ -22,11 +22,10 @@ mod.apply_slot_customization = function(self, slot_name)
   local item = table.clone_instance(visual_loadout_extension._equipment[slot_name].item)
 
   if item then
-    local t = FixedFrame.get_latest_fixed_time() or 1
-
-    visual_loadout_extension:unequip_item_from_slot(slot_name, t)
-
     mod:load_item_packages(item, function()
+      local t = FixedFrame.get_latest_fixed_time() or 1
+
+      visual_loadout_extension:unequip_item_from_slot(slot_name, t)
       visual_loadout_extension:equip_item_to_slot(item, slot_name, nil, t)
     end)
   end
