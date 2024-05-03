@@ -28,6 +28,15 @@ mod.shorten_item_name = function(self, name)
   return t[#t]
 end
 
+mod.get_highest_attachment_id = function(self, item)
+  local ids = {0,}
+
+  for name, data in pairs(item.attachments or {}) do
+    table.insert(ids, tonumber(string.split(name, "_")[2]))
+  end
+
+  return math.max(unpack(ids))
+end
 
 mod.get_visual_loadout_extension = function()
   local player = Managers.player:local_player_safe(1)

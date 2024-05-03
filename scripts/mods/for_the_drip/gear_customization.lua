@@ -217,16 +217,13 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
   local has_extra_attachment = false
 
-
+  local attach_count = 0
 
   if source_item then
     if not source_item.attachments then
       rawset(source_item, "attachments", {})
     else
       -- reset extra attachments in case they got removed
-
-      local attach_count = 0
-
       for name, att_data in pairs(source_item.attachments) do
         if att_data.is_extra then
           source_item.attachments[name] =
@@ -236,41 +233,10 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
             ["item"] = "",
             ["is_extra"] = true,
           }
-        else -- only count the original attachments
-          attach_count = attach_count + 1
         end
+
+        attach_count = attach_count + 1
       end
-    end
-
-
-    if customization_data and customization_data.extra_attachments then
-      for k, item in pairs(customization_data.extra_attachments) do
-        local attach_name = "attachment_"..(attach_count+k)
-        source_item.attachments[attach_name] =
-        {
-          ["children"] = {},
-          ["material_overrides"] = {},
-          ["item"] = item,
-          ["is_extra"] = true,
-        }
-
-        customization_data.attachments[item] =
-        {
-          ["is_visible"] = true,
-          ["customize"] = true,
-          ["name"] = attach_name,
-          ["is_extra"] = true,
-        }
-
-        mod:load_item_packages(MasterItems.get_item(item))
-      end
-
-      has_extra_attachment = true
-
-      -- save the current loadout to make sure the attachments are saved
-      mod:save_current_loadout()
-
-      customization_data.extra_attachments = nil -- attachment added, no need to keep them here
     end
 
     if customization_data then
@@ -669,7 +635,16 @@ mod.load_slot_data = function(self, slot)
   end
 end
 
-
+mod.make_extra_attach_data = function(self, attach_item_name, item)
+  return
+  {
+    ["is_visible"] = true,
+    ["is_extra"] = true,
+    ["customize"] = true,
+    ["name"] = "attachment_"..(mod:get_highest_attachment_id(item)+1),
+    ["material_overrides"] = {},
+  }
+end
 
 mod.show_body_slot = function(self, visual_loadout_extension)
   if not mod.current_slots_data.gear_customization_data then

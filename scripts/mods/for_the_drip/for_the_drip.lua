@@ -84,7 +84,7 @@ mod.get_slot_item = function(self, slot_name)
         local gear_name = face_item.attachments and face_item.attachments.slot_gear_head and face_item.attachments.slot_gear_head.item and face_item.attachments.slot_gear_head.item.name
 
         if gear_name then
-          item = MasterItems.get_item(gear_name)
+          item = face_item.attachments.slot_gear_head.item
         end
       end
     end

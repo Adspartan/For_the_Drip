@@ -503,11 +503,12 @@ ImguiDripEditor.slot_customization_ui = function(self)
           Imgui.same_line()
 
           if Imgui.button("Add Attachment", x-35) then
-            if not data.extra_attachments then
-              data.extra_attachments = {}
+            if not data.attachments then
+              data.attachments = {}
             end
 
-            data.extra_attachments[#data.extra_attachments + 1] = mod.selected_extra_attach
+            data.attachments[mod.selected_extra_attach] = mod:make_extra_attach_data(mod.selected_extra_attach, item)
+            mod:save_current_loadout()
 
             mod:load_item_packages(MasterItems.get_item(mod.selected_extra_attach), function()
               mod:refresh_all_gear_slots()
