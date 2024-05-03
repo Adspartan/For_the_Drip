@@ -240,6 +240,22 @@ mod.prepare_body_slot_item = function(self, loadout, slot_name)
   return item
 end
 
+mod.add_required_body_attachments = function(self, item, loadout, slot_name)
+  local attachments = item.attachments or {}
+
+  for k, slot_dep_name in pairs(PlayerCharacterConstants.slot_configuration[slot_name].slot_dependencies) do
+    local attachment = table.clone_instance(loadout[slot_dep_name])
+
+    if not attachments[slot_dep_name] then
+      attachments[slot_dep_name] = { item = attachment }
+    end
+  end
+
+  rawset(item, "attachments", attachments)
+
+  return item
+end
+
 mod.refresh_slot = function(self, slot_name)
   local visual_loadout_extension = mod:get_visual_loadout_extension()
 

@@ -73,6 +73,8 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   local body_data = mod.current_slots_data.body_customization_data
 
   if slot_name == "slot_body_face" or slot_name == "slot_body_hair_color" then
+    local mats = table.clone(source_item.material_overrides or {})
+
     if body_data.use_custom_hair_color and body_data.custom_hair_color ~= "" then
       local mat_name = "hair_color_custom"
 
@@ -84,9 +86,14 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
         },
 	    }
 
-      rawset(source_item, "material_overrides", {"hair_color_custom"})
-    else
-      rawset(source_item, "material_overrides", {})
+      if not table.array_contains(mats, "hair_color_custom") then
+        table.insert(mats, "hair_color_custom")
+      end
+
+      rawset(source_item, "material_overrides", mats)
+    elseif source_item.material_overrides and table.array_contains(mats, "hair_color_custom") then
+      mats = table.filter(mats, function(v) return v ~= "hair_color_custom" end)
+      rawset(source_item, "material_overrides", mats)
     end
   end
 
@@ -126,7 +133,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     end
 
     if hide_hair == nil then
-      hide_hair = mod:current_head_gear_hide_hair() --custom_head_gear.mask_hair == "" and table.contains(custom_head_gear.hide_slots or {}, "slot_body_hair")
+      hide_hair = mod:current_head_gear_hide_hair()
     end
 
     if hide_hair then
@@ -139,10 +146,11 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       local player = Managers.player:local_player_safe(1)
       local loadout = player:profile().loadout
 
+      local hair_item = mod:add_required_body_attachments(loadout["slot_body_hair"], loadout, "slot_body_hair")
+
       rawset(source_item.attachments, "slot_body_hair" ,
       {
-        children = { loadout["slot_body_hair_color"], },
-        item = loadout["slot_body_hair"],
+        item = mod:make_custom_item("slot_body_hair", hair_item),
       })
     end
 
