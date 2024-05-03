@@ -646,7 +646,7 @@ mod.load_slot_data = function(self, slot)
       data.hide_beard = master_item.hide_beard or false
       data.mask_hair = master_item.mask_hair
       data.mask_facial_hair = master_item.mask_facial_hair
-      data.hide_hair = data.mask_hair == ""
+      data.hide_hair = mod:current_head_gear_hide_hair()
     end
 
     data.attachments = {}
