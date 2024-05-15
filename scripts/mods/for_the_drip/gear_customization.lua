@@ -101,7 +101,6 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     local gear_head_item = source_item.attachments and source_item.attachments["slot_gear_head"] and source_item.attachments["slot_gear_head"].item or table.clone_instance(MasterItems.get_item("content/items/characters/player/human/gear_head/empty_headgear"))
     local custom_head_gear = mod:make_custom_item("slot_gear_head", gear_head_item)
 
-
     if not source_item.attachments then
       rawset(source_item, "attachments", {})
     end
@@ -216,7 +215,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   end
 
   local has_extra_attachment = false
-
+  local is_empty_backpack = false
   local attach_count = 0
 
   if source_item then
@@ -248,7 +247,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
             ["children"] = {},
             ["material_overrides"] = {},
             ["is_extra"] = true,
-            ["item"] = item
+            ["item"] = table.clone(MasterItems.get_item(item))
           }
         end
       end
@@ -271,7 +270,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       {
         ["children"] = {},
         ["material_overrides"] = {},
-        ["item"] = mod.selected_extra_attach,
+        ["item"] = table.clone(MasterItems.get_item(mod.selected_extra_attach)),
         ["is_extra"] = true,
         ["is_preview"] = true,
       }
@@ -402,6 +401,31 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
       rawset(source_item, "hide_slots", hide_slots)
     end
+  elseif slot_name == "slot_gear_extra_cosmetic" then
+    if source_item.name == "content/items/characters/player/human/backpacks/empty_backpack" then
+      for k, v in pairs(source_item.attachments or {}) do
+        if v.item then
+          if type(v.item) == "string" then
+            v.item = table.clone(MasterItems.get_item(v.item))
+          end
+
+          is_empty_backpack = true
+
+          -- swap the 2 units
+          rawset(source_item, "base_unit", v.item.base_unit)
+          rawset(source_item, "material_overrides", table.clone(v.item.material_overrides))
+          rawset(source_item, "resource_dependencies", table.clone(v.item.resource_dependencies))
+
+          -- only 1 backpack
+          break
+        end
+      end
+
+      rawset(source_item, "attachments", {})
+      rawset(source_item, "is_fallback_item", false)
+      rawset(source_item, "sort_order", 0)
+      rawset(source_item, "source", 4)
+    end
   elseif slot_name == "slot_gear_head" then
     if customization_data then
       customization_data.mask_face = customization_data.mask_face or ""
@@ -433,9 +457,19 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
   local material_names = {}
 
+  if is_empty_backpack then
+    material_names = table.clone(source_item.material_overrides or {})
+  end
+
   if not has_custom_attach_material then
     if customization_data and customization_data.material_overrides then
-      material_overrides = table.clone(customization_data.material_overrides)
+      if is_empty_backpack then
+        for k, v in pairs(customization_data.material_overrides) do
+          material_names[#material_names+1] = v
+        end
+      else
+        material_overrides = table.clone(customization_data.material_overrides)
+      end
     end
 
     table.insert(material_names, full_mat_name)
