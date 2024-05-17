@@ -236,6 +236,12 @@ mod:hook_safe(CLASS.PlayerManager, "add_player", function (self, player_class, c
   end
 end)
 
+mod:hook_safe(CLASS.StateMainMenu, "event_request_select_new_profile", function (self, profile)
+  if profile.character_id then
+    mod:persistent_table("data").character_id = profile.character_id
+    mod:load_character_loadout(profile.character_id)
+  end
+end)
 
 mod:hook(CLASS.UIProfileSpawner, "spawn_profile", function(func, self, profile, ...)
   local id = profile.character_id
