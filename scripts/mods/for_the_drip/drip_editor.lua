@@ -460,9 +460,7 @@ ImguiDripEditor.slot_customization_ui = function(self)
                 index = index + 1
 
                 if Imgui.selectable(attach, attach == mod.selected_extra_attach) then
-                  mod.selected_extra_attach = attach
                   mod.selected_attachment_index = index
-
                   mod:preview_attachment(attach)
                 end
               end
