@@ -431,13 +431,10 @@ mod.load_item_packages = function(self, item, callback)
   for package_name, _ in pairs(dependencies) do
     dependencies[package_name] = true
 
-    -- already loaded (todo: check it's still loaded / unload when no longer needed)
-    if not mod._loaded_packages[package_name] then
-      loading_finished[package_name] = false
-      local load_id = Managers.package:load(package_name, "for_the_drip", function()  loading_finished[package_name] = true end, true)
-      mod._loaded_packages[package_name] = mod._loaded_packages[package_name] or {}
-      table.insert(mod._loaded_packages[package_name], load_id)
-    end
+    loading_finished[package_name] = false
+    local load_id = Managers.package:load(package_name, "for_the_drip", function()  loading_finished[package_name] = true end, true)
+    mod._loaded_packages[package_name] = mod._loaded_packages[package_name] or {}
+    table.insert(mod._loaded_packages[package_name], load_id)
   end
 
   rawset(item, "resource_dependencies", dependencies)
