@@ -128,11 +128,11 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
       if head_gead_data then
         hide_hair = head_gead_data.hide_hair
+      else
+        hide_hair = mod:head_gear_hide_hair(custom_head_gear)
       end
-    end
-
-    if hide_hair == nil then
-      hide_hair = mod:current_head_gear_hide_hair()
+    else
+      hide_hair = mod:head_gear_hide_hair(custom_head_gear)
     end
 
     if hide_hair then
@@ -769,21 +769,43 @@ mod.current_head_gear_mask_face = function()
   return ""
 end
 
+mod.head_gear_hide_hair = function(self, item)
+  if not item then
+    return false
+  end
+
+  mod:dump_table_to_file(item, 5, "head_hair", false)
+
+  if item.name == "content/items/characters/player/human/gear_head/empty_headgear" or item.mask_hair ~= "" then
+    return false
+  end
+
+  for k,v in pairs(item.hide_slots or {}) do
+    if v == "slot_body_hair" then
+      return true
+    end
+  end
+
+  return false
+end
+
 mod.current_head_gear_hide_hair = function()
   local vle = mod:get_visual_loadout_extension()
 
   if vle then
     local head_slot = vle._equipment["slot_gear_head"]
+    local face_slot = vle._equipment["slot_body_face"]
+
 
     if head_slot and head_slot.item then
-      if head_slot.item.name == "content/items/characters/player/human/gear_head/empty_headgear" or head_slot.item.mask_hair ~= "" then
+      return mod:head_gear_hide_hair(head_slot.item)
+    elseif face_slot and face_slot.item and face_slot.item.attachments then
+    --   mod:dump_table_to_file(face_slot.item, 6, "face_slot", false)
+    local slot_body_hair = face_slot.item.attachments.slot_body_hair
+      if slot_body_hair and slot_body_hair.item and slot_body_hair.item ~= "" then
         return false
-      end
-
-      for k,v in pairs(head_slot.item.hide_slots or {}) do
-        if v == "slot_body_hair" then
-          return true
-        end
+      else
+        return true
       end
     end
   end
@@ -818,9 +840,7 @@ mod.update_preview_attachment_index = function(self)
       last_attach_found = attach
 
       if index == mod.selected_attachment_index then
-        mod.selected_extra_attach = attach
         mod.selected_attachment_index = index
-
         mod:preview_attachment(attach)
         return
       end
@@ -842,5 +862,7 @@ mod.preview_attachment = function(self, item_name)
       mod.selected_extra_attach = item_name
       mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
     end)
+  else
+    mod.selected_extra_attach = item_name
   end
 end
