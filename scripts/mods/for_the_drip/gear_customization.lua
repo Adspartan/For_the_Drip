@@ -404,17 +404,28 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   elseif slot_name == "slot_gear_extra_cosmetic" then
     if source_item.name == "content/items/characters/player/human/backpacks/empty_backpack" then
       for k, v in pairs(source_item.attachments or {}) do
-        if v.item then
+        if v.item and v.item ~= "" then
+          local backpack_error = false
+
           if type(v.item) == "string" then
-            v.item = table.clone(MasterItems.get_item(v.item))
+            local miv_item = MasterItems.get_item(v.item)
+
+            if miv_item then
+              v.item = table.clone(miv_item)
+            else
+              backpack_error = true
+            end
+
           end
 
           is_empty_backpack = true
 
-          -- swap the 2 units
-          rawset(source_item, "base_unit", v.item.base_unit)
-          rawset(source_item, "material_overrides", table.clone(v.item.material_overrides))
-          rawset(source_item, "resource_dependencies", table.clone(v.item.resource_dependencies))
+          if backpack_error == false then
+            -- swap the 2 units
+            rawset(source_item, "base_unit", v.item.base_unit)
+            rawset(source_item, "material_overrides", table.clone(v.item.material_overrides))
+            rawset(source_item, "resource_dependencies", table.clone(v.item.resource_dependencies))
+          end
 
           -- only 1 backpack
           break
