@@ -744,12 +744,11 @@ ImguiDripEditor.ui_content = function(self)
         mod.selected_preset_name = "none"
       end
 
-      for i=1,mod.max_preset_id do
-        local id = tostring(i)
-        if mod.saved_looks[id] then
-          if Imgui.selectable(mod.saved_looks[id].name, mod.selected_preset == id) then
+      for id, name in pairs(mod.presets_info.presets) do
+        if name and mod.presets[id] then
+          if Imgui.selectable(name, mod.selected_preset == id) then
             mod.selected_preset = id
-            mod.selected_preset_name = mod.saved_looks[id].name
+            mod.selected_preset_name = name
           end
         end
       end

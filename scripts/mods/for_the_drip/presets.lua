@@ -1,6 +1,7 @@
 local mod = get_mod("for_the_drip")
 
 local ItemMaterialOverrides = require("scripts/settings/equipment/item_material_overrides/item_material_overrides")
+local MasterItems = require("scripts/backend/master_items")
 
 mod.default_slot_data = function()
   return {
@@ -13,6 +14,75 @@ mod.default_slot_data = function()
     gear_customization_data = {},
     body_customization_data = {},
   }
+end
+
+mod.load_preset_packages = function(self, preset)
+  if preset.gear_customization_data then
+    for name, data in pairs(preset.gear_customization_data) do
+      for att_item_name, att_data in pairs(data.attachments or {}) do
+        if att_data.is_extra then
+          mod:load_item_packages(MasterItems.get_item(att_item_name))
+        end
+      end
+    end
+  end
+end
+
+mod.load_presets_v2 = function(self)
+  if mod.file_exist("presets_info.lua") then
+    mod.presets_info = mod.load_lua_file("presets_info")
+
+    for id, name in pairs(mod.presets_info.presets) do
+      mod.presets[id] = mod.load_lua_file("preset_"..id)
+      mod:load_preset_packages(mod.presets[id])
+    end
+  else
+    if mod.file_exist("loadouts.txt") then
+      mod:echo("Importing old presets..")
+      local lines = mod.read_all_lines("loadouts.txt")
+
+      for line in lines do
+        if line ~= "" then
+          local preset = table.clone(mod.deprecated_loadout_from_str(line))
+          local id = tostring(mod.presets_info.max_preset_id+1)
+          preset.id = preset.id or id
+
+          if tonumber(preset.id) > mod.presets_info.max_preset_id then
+            mod.presets_info.max_preset_id = tonumber(preset.id)
+          end
+
+          preset.name = preset.name or ("Preset "..id)
+
+          mod.presets[preset.id] = preset
+          mod.presets_info.presets[preset.id] = preset.name
+        end
+      end
+    end
+
+    -- save to convert to the new format
+    mod:save_presets_v2()
+    mod:echo("Done")
+  end
+end
+
+mod.save_presets_infos = function(self)
+  mod.save_table_to_file(mod.presets_info, "presets_info")
+end
+
+mod.save_presets_v2 = function(self)
+  mod:save_presets_infos()
+
+  for id, name in pairs(mod.presets_info.presets) do
+    if mod.presets[id] then
+      mod.save_table_to_file(mod.presets[id], "preset_"..id)
+    end
+  end
+
+  for id, exist in pairs(mod.presets_info and mod.presets_info.character_presets or {}) do
+    if mod.character_presets[id] then
+      mod.save_table_to_file(mod.character_presets[id], "preset_"..id)
+    end
+  end
 end
 
 local slot_data_to_str = function(slot_data)
@@ -201,7 +271,7 @@ mod.custom_material_from_str = function(self, material_str)
   return data
 end
 
-local loadout_from_str = function(str)
+mod.deprecated_loadout_from_str = function(str)
   local st_1 = nil
   local st_2 = nil
   local st_3 = nil
@@ -279,22 +349,16 @@ end
 
 
 mod.load_preset = function(id)
-  local data = mod.saved_looks[id]
+  local data = mod.presets[id]
 
-  if data then
-    mod:reset_all_gear_slots() -- to clear out customizations
-    mod.current_slots_data = table.clone(data)
-    mod:save_current_loadout()
-    mod:refresh_all_gear_slots()
+  if not data then
+    data = mod:default_slot_data()
   end
-end
 
-mod.save_loadout_to_current_char = function()
-  local id = mod:persistent_table("data").character_id
-
-  if id then
-    mod.character_slots_data[id] = table.clone(mod.current_slots_data)
-  end
+  mod:reset_all_gear_slots() -- to clear out customizations
+  mod.current_slots_data = table.clone(data)
+  mod:save_current_loadout()
+  mod:refresh_all_gear_slots()
 end
 
 mod.material_data_to_custom = function(self, material_data)
@@ -416,62 +480,58 @@ mod.save_material_override_to_slot = function(slot_name, material_override_data)
   end
 end
 
-mod.load_saved_loadouts = function(self)
-  mod.saved_looks = {}
-
-  if mod.file_exist("loadouts.txt") then
-    local lines = mod.read_all_lines("loadouts.txt")
-
-    for line in lines do
-      if line ~= "" then
-        local preset = table.clone(loadout_from_str(line))
-        local id = tostring(mod.max_preset_id+1)
-        preset.id = preset.id or id
-
-        if tonumber(preset.id) > mod.max_preset_id then
-          mod.max_preset_id = tonumber(preset.id)
-        end
-
-        preset.name = preset.name or ("Preset "..id)
-
-        mod.saved_looks[preset.id] = preset
-      end
-    end
-  end
-end
-
 mod.load_current_character_loadout = function()
   local id = mod:persistent_table("data").character_id
 
   local player = Managers.player:local_player_safe(1)
+
+  mod.current_slots_data = mod:default_slot_data()
 
   if player then
     id = player:character_id()
 
     if id then
       mod:persistent_table("data").character_id = id
-      mod:load_character_loadout(id)
+      mod:load_character_loadout(id, true)
     end
   end
 end
 
-mod.load_character_loadout = function(self, id)
-  if not mod.character_slots_data[id] then
-    if id and mod.file_exist("loadout_"..id..".txt") then
-      for line in mod.read_all_lines("loadout_"..id..".txt") do
-        mod.current_slots_data = table.clone(loadout_from_str(line))
-        mod.character_slots_data[id] = table.clone(mod.current_slots_data)
-        break
-      end
-    else
-      mod.current_slots_data = mod:default_slot_data()
+mod.load_character_loadout = function(self, id, apply)
+  if not id then
+    return
+  end
 
-      if id then
-        mod.character_slots_data[id] = mod:default_slot_data()
+  if mod.presets_info.character_presets[id] then
+    -- not loaded yet or it has been manually deleted
+    if not mod.character_presets[id] then
+      if mod.file_exist("preset_"..id..".lua") then
+        mod.character_presets[id] = mod.load_lua_file("preset_"..id)
+        mod.presets_info.character_presets[id] = true
+
+        mod:load_preset_packages(mod.character_presets[id])
+      else
+        mod.character_presets[id] = mod:default_slot_data()
+        mod.presets_info.character_presets[id] = false
       end
     end
   else
-    mod.current_slots_data = table.clone(mod.character_slots_data[id])
+    if mod.file_exist("loadout_"..id..".txt") then
+      for line in mod.read_all_lines("loadout_"..id..".txt") do
+        mod.character_presets[id] = table.clone(mod.deprecated_loadout_from_str(line))
+        mod.presets_info.character_presets[id] = true
+        mod.save_table_to_file(mod.character_presets[id], "preset_"..id)
+        mod:save_presets_infos()
+        break
+      end
+    else
+      mod.character_presets[id] = mod:default_slot_data()
+      mod.presets_info.character_presets[id] = false
+    end
+  end
+
+  if apply then
+    mod.current_slots_data = table.clone(mod.character_presets[id])
   end
 end
 
@@ -479,69 +539,70 @@ end
 mod.deleted_selected_preset = function()
   if mod.selected_preset ~= "none" then
     local temp = {}
+    local temp_presets_info = {}
 
-    for id,preset in pairs(mod.saved_looks) do
+    for id,preset in pairs(mod.presets) do
       if id ~= mod.selected_preset then
         temp[id] = preset
+        temp_presets_info[id] = mod.presets_info.presets[id]
       end
     end
 
     mod:echo(mod.selected_preset_name.. " has been deleted")
 
-    mod.saved_looks = table.clone(temp)
+    mod.presets = table.clone(temp)
+    mod.presets_info.presets = table.clone(temp_presets_info)
     mod.selected_preset = "none"
     mod.selected_preset_name = "none"
 
-    mod:save_loadouts_to_file()
+    mod:save_presets_infos()
   end
 end
 
 mod.override_selected_preset = function()
   if mod.selected_preset ~= "none" then
-    local id = mod.saved_looks[mod.selected_preset].id
-    local name = mod.saved_looks[mod.selected_preset].name
+    local id = mod.presets[mod.selected_preset].id
+    local name = mod.presets[mod.selected_preset].name
 
-    mod.saved_looks[mod.selected_preset] = table.clone(mod.current_slots_data)
-    mod.saved_looks[mod.selected_preset].id = id
-    mod.saved_looks[mod.selected_preset].name = name
+    mod.presets[id] = table.clone(mod.current_slots_data)
 
     mod:echo(mod.selected_preset_name.. " has been overridden")
 
-    mod:save_loadouts_to_file()
+    mod.save_table_to_file(mod.presets[id], "preset_"..id)
+    mod:save_presets_infos()
   end
 end
 
 mod.save_current_look = function()
-  mod.max_preset_id = mod.max_preset_id + 1
-  local index = tostring(mod.max_preset_id)
-  mod.saved_looks[index] = table.clone(mod.current_slots_data)
-  mod.saved_looks[index].id = index
-  mod.saved_looks[index].name = "Preset "..index
+  mod.presets_info.max_preset_id = mod.presets_info.max_preset_id + 1
+  local index = tostring(mod.presets_info.max_preset_id)
+  mod.presets[index] = table.clone(mod.current_slots_data)
+  mod.presets[index].id = index
+  mod.presets[index].name = "Preset "..index
+
+  mod.presets_info.presets[index] = mod.presets[index].name
+  mod.save_table_to_file(mod.presets[index], "preset_"..index)
 
   mod:echo("Preset ".. index.. " saved")
 
-  mod:save_loadouts_to_file()
-end
-
-mod.save_loadouts_to_file = function()
-  local data = {}
-
-  for k,v in pairs(mod.saved_looks) do
-    table.insert(data, loadout_to_string(v))
-  end
-
-  mod.dump_table_values_to_file(data, "loadouts", false)
-  mod:save_current_loadout()
-end
-
-mod.save_current_loadout = function()
-  local data = {loadout_to_string(mod.current_slots_data)}
-  mod.dump_table_values_to_file(data, "current_loadout", false)
-
   local id = mod:persistent_table("data").character_id
   if id then
-    mod.dump_table_values_to_file(data, "loadout_"..id, false)
-    mod.character_slots_data[id] = table.clone(mod.current_slots_data)
+    mod.save_table_to_file(mod.character_presets[id], "preset_"..id)
+    mod.presets_info.character_presets[id] = true
+  end
+
+  mod:save_presets_infos()
+end
+
+
+mod.save_current_loadout = function()
+  local id = mod:persistent_table("data").character_id
+  if id then
+    mod.character_presets[id] = table.clone(mod.current_slots_data)
+    mod.presets_info.character_presets[id] = true
+
+    mod.save_table_to_file(mod.character_presets[id], "preset_"..id)
+    mod:save_presets_infos()
   end
 end
 

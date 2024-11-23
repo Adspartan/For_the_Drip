@@ -137,7 +137,7 @@ function _table_tostring_array(t, depth, max_depth, skip_private, sort_keys)
     local key_str = string_keys[i]
     local value = t[key_str]
     str[#str + 1] = tabs
-    str[#str + 1] = key_str
+    str[#str + 1] = "[\""..key_str.."\"]"
     str[#str + 1] = " = "
 
     table.append(str, _value_to_string_array(value, depth, max_depth, skip_private, sort_keys))

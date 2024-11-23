@@ -9,16 +9,21 @@ local ItemPackage = require("scripts/foundation/managers/package/utilities/item_
 local PlayerCharacterConstants = require("scripts/settings/player_character/player_character_constants")
 
 mod.current_slots_data = {}
-mod.character_slots_data = {}
-mod.saved_looks = {}
-mod.max_preset_id = 0
+mod.character_presets = {}
+mod.presets = {}
+mod.presets_info =
+{
+  max_preset_id = 0,
+  presets = {},
+  character_presets = {}
+}
 
 mod.reset_visual_loadout = function()
   mod.selected_unit_slot = "none"
   mod.selected_preset = "none"
   mod.selected_preset_name = ""
   mod.current_slots_data = mod:default_slot_data()
-  mod:save_loadout_to_current_char()
+  mod:save_current_loadout()
 
   mod:reset_all_gear_slots()
 
@@ -384,16 +389,16 @@ mod.on_all_mods_loaded = function()
   Managers.backend.interfaces.characters:fetch():next(function(characters)
     if characters then
       Promise.until_true(MasterItems.has_data):next(function()
-        mod:load_saved_loadouts()
+        mod:load_presets_v2()
 
         for k, character in pairs(characters) do
-          mod:load_character_loadout(character.id)
+          mod:load_character_loadout(character.id, false)
         end
+
+        mod:refresh_drip()
       end)
     end
   end)
-
-  mod:refresh_drip()
 
   if mod:get("preview_attachments") == nil then
     mod:set("preview_attachments", true)

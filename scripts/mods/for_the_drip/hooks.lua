@@ -154,9 +154,9 @@ mod:hook(CLASS.PlayerUnitVisualLoadoutExtension, "_equip_item_to_slot", function
     return
   end
 
-  mod:load_extra_packages_if_needed(item)
-
   local custom_item = mod:make_custom_item(slot_name, item, "_equip_item_to_slot")
+
+  mod:load_extra_packages_if_needed(custom_item)
 
   self._equipment_component._is_player = true
 
@@ -239,7 +239,7 @@ end)
 mod:hook_safe(CLASS.StateMainMenu, "event_request_select_new_profile", function (self, profile)
   if profile.character_id then
     mod:persistent_table("data").character_id = profile.character_id
-    mod:load_character_loadout(profile.character_id)
+    mod:load_character_loadout(profile.character_id, true)
   end
 end)
 

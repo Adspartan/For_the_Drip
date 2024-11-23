@@ -16,7 +16,10 @@ end
 mod.setup_output_folder = function()
   local directory = _os.getenv('APPDATA').."/Fatshark/Darktide/for_the_drip/"
   mod:persistent_table("data").directory = directory
-  _os.execute("mkdir " .. "\"" .. mod:persistent_table("data").directory .. "\" 2>nul")
+  _os.execute("mkdir " .. "\"" .. directory .. "\" 2>nul")
+  -- remove readonly attribute
+  _os.execute("attrib /d -r " .. "\"" .. directory .. "\" /s 2>nul")
+  _os.execute("attrib -r " .. "\"" .. directory .. "*.*\" /s 2>nul")
 end
 
 mod.append_to_file = function(line, filename)
@@ -102,3 +105,33 @@ end
 mod.read_all_lines = function(file)
   return _io.lines(mod:persistent_table("data").directory..file)
 end
+
+
+mod.save_table_to_file = function(data, filename)
+  local file,err =_io.open(mod:persistent_table("data").directory..filename..".lua", "wb")
+
+  if err then
+    mod:echo("Failed to save file: '"..filename"' error: "..err)
+    return err
+  end
+
+  file:write(mod:table_tostring(data, 10))
+  file:close()
+end
+
+local _loadstring = Mods.lua.loadstring
+
+mod.load_lua_file = function(filename)
+  local f = assert(_io.open(mod:persistent_table("data").directory..filename..".lua", "r"))
+  local content = f:read("*all")
+  f:close()
+
+  local func = _loadstring("local t ="..content.."\nreturn t")
+
+  if func then
+    return func()
+  else
+    mod:echo("Failed to load file '"..filename.."'")
+  end
+end
+
