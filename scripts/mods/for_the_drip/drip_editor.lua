@@ -742,6 +742,7 @@ ImguiDripEditor.ui_content = function(self)
       if Imgui.selectable("none", mod.selected_preset == "none") then
         mod.selected_preset = "none"
         mod.selected_preset_name = "none"
+        mod.new_preset_name = ""
       end
 
       for id, name in pairs(mod.presets_info.presets) do
@@ -749,6 +750,7 @@ ImguiDripEditor.ui_content = function(self)
           if Imgui.selectable(name, mod.selected_preset == id) then
             mod.selected_preset = id
             mod.selected_preset_name = name
+            mod.new_preset_name = name
           end
         end
       end
@@ -767,6 +769,16 @@ ImguiDripEditor.ui_content = function(self)
     end
 
     if mod.selected_preset ~= "none" then
+      Imgui.spacing()
+      Imgui.same_line()
+
+      mod.new_preset_name = Imgui.input_text("", mod.new_preset_name)
+      Imgui.same_line()
+      if Imgui.button("Rename Preset") then
+        mod:rename_selected_preset()
+        mod.selected_preset_name = mod.new_preset_name
+      end
+
       Imgui.spacing()
       Imgui.same_line()
 

@@ -22,6 +22,7 @@ mod.reset_visual_loadout = function()
   mod.selected_unit_slot = "none"
   mod.selected_preset = "none"
   mod.selected_preset_name = ""
+  mod.new_preset_name = ""
   mod.current_slots_data = mod:default_slot_data()
   mod:save_current_loadout()
 

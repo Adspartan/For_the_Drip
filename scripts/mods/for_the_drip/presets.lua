@@ -554,7 +554,25 @@ mod.deleted_selected_preset = function()
     mod.presets_info.presets = table.clone(temp_presets_info)
     mod.selected_preset = "none"
     mod.selected_preset_name = "none"
+    mod.new_preset_name = "none"
 
+    mod:save_presets_infos()
+  end
+end
+
+mod.rename_selected_preset = function()
+    if mod.selected_preset ~= "none" and mod.new_preset_name ~= "" then
+    local id = mod.presets[mod.selected_preset].id
+    local name = mod.presets[mod.selected_preset].name
+
+    mod.presets[id].name = mod.new_preset_name
+    mod.presets_info.presets[id] = mod.new_preset_name
+
+    mod:echo(mod.selected_preset_name.. " has been renamed to ".. mod.new_preset_name)
+
+    mod.selected_preset_name = mod.new_preset_name
+
+    mod.save_table_to_file(mod.presets[id], "preset_"..id)
     mod:save_presets_infos()
   end
 end
