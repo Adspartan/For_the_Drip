@@ -39,19 +39,27 @@ mod.load_presets_v2 = function(self)
   else
     if mod.file_exist("loadouts.txt") then
       mod:echo("Importing old presets..")
+
       local lines = mod.read_all_lines("loadouts.txt")
+
+      mod.presets_info =
+      {
+        max_preset_id = 0,
+        presets = {},
+        character_presets = {}
+      }
 
       for line in lines do
         if line ~= "" then
           local preset = table.clone(mod.deprecated_loadout_from_str(line))
-          local id = tostring(mod.presets_info.max_preset_id+1)
-          preset.id = preset.id or id
+
+          preset.id = preset.id or tostring(mod.presets_info.max_preset_id+1)
 
           if tonumber(preset.id) > mod.presets_info.max_preset_id then
             mod.presets_info.max_preset_id = tonumber(preset.id)
           end
 
-          preset.name = preset.name or ("Preset "..id)
+          preset.name = preset.name or ("Preset "..preset.id)
 
           mod.presets[preset.id] = preset
           mod.presets_info.presets[preset.id] = preset.name
@@ -541,9 +549,9 @@ mod.deleted_selected_preset = function()
     local temp = {}
     local temp_presets_info = {}
 
-    for id,preset in pairs(mod.presets) do
+    for id,name in pairs(mod.presets_info.presets) do
       if id ~= mod.selected_preset then
-        temp[id] = preset
+        temp[id] = mod.presets[id]
         temp_presets_info[id] = mod.presets_info.presets[id]
       end
     end
@@ -561,9 +569,9 @@ mod.deleted_selected_preset = function()
 end
 
 mod.rename_selected_preset = function()
-    if mod.selected_preset ~= "none" and mod.new_preset_name ~= "" then
-    local id = mod.presets[mod.selected_preset].id
-    local name = mod.presets[mod.selected_preset].name
+  if mod.selected_preset ~= "none" and mod.new_preset_name ~= "" then
+    local id = mod.selected_preset
+    local name = mod.presets_info.presets[id]
 
     mod.presets[id].name = mod.new_preset_name
     mod.presets_info.presets[id] = mod.new_preset_name
@@ -579,8 +587,7 @@ end
 
 mod.override_selected_preset = function()
   if mod.selected_preset ~= "none" then
-    local id = mod.presets[mod.selected_preset].id
-    local name = mod.presets[mod.selected_preset].name
+    local id = mod.selected_preset
 
     mod.presets[id] = table.clone(mod.current_slots_data)
 

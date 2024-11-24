@@ -169,8 +169,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
         rawset(source_item, "attachments", {})
       end
 
-      local attach_count = table.size(source_item.attachments)
-      local attach_name = "attachment_"..(attach_count+1)
+      local attach_name = "attachment_preview"
 
       source_item.attachments[attach_name] =
       {
@@ -264,7 +263,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       end
 
       local attach_count = table.size(source_item.attachments)
-      local attach_name = "attachment_"..(attach_count+1)
+      local attach_name = "attachment_preview"
 
       source_item.attachments[attach_name] =
       {
@@ -785,8 +784,6 @@ mod.head_gear_hide_hair = function(self, item)
     return false
   end
 
-  mod:dump_table_to_file(item, 5, "head_hair", false)
-
   if item.name == "content/items/characters/player/human/gear_head/empty_headgear" or item.mask_hair ~= "" then
     return false
   end
@@ -811,8 +808,7 @@ mod.current_head_gear_hide_hair = function()
     if head_slot and head_slot.item then
       return mod:head_gear_hide_hair(head_slot.item)
     elseif face_slot and face_slot.item and face_slot.item.attachments then
-    --   mod:dump_table_to_file(face_slot.item, 6, "face_slot", false)
-    local slot_body_hair = face_slot.item.attachments.slot_body_hair
+      local slot_body_hair = face_slot.item.attachments.slot_body_hair
       if slot_body_hair and slot_body_hair.item and slot_body_hair.item ~= "" then
         return false
       else
