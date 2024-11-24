@@ -532,17 +532,24 @@ mod.fetch_avaiable_attachment_per_slot_per_breed = function()
                   att_name = attachment.item.name
                 end
 
-                if att_name and att_name ~= "" and (not t_add[att_name]) then
-                  t[#t + 1] = att_name
+                if att_name and att_name ~= "" then
                   no_item_attachments = false
-                  t_add[att_name] = true
+
+                  if not t_add[att_name] then
+                    t[#t + 1] = att_name
+                    t_add[att_name] = true
+                  end
                 end
               end
             end
-            -- add the full item, todo: toggle/filter ?
+
+            -- full items causes issues as they can't be used as attachments
             if (not t_add[item.name]) and no_item_attachments then
-              t[#t + 1] = item.name
-              t_add[item.name] = true
+              -- those don't have any sub attachments but are still causing issues
+              if (not string.contains_any(item.name, "empty_", "preview_")) then
+                t[#t + 1] = item.name
+                t_add[item.name] = true
+              end
             end
           end
         end

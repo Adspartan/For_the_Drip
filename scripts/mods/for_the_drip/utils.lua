@@ -14,6 +14,18 @@ mod.split_str = function(self, str, sep)
   return res
 end
 
+string.contains_any = function(str, ...)
+  local t = {...}
+
+  for k, v in pairs(t) do
+    if string.find(str, v) then
+      return true
+    end
+  end
+
+  return false
+end
+
 mod.shorten_item_name = function(self, name)
   if not name then
     return "<nil>"
