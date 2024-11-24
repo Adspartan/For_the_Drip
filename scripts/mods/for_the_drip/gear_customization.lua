@@ -822,6 +822,7 @@ end
 
 mod.reset_selected_attachment = function(self)
   mod.selected_extra_attach = ""
+  mod.current_preview_attach_display = ""
   mod.selected_attachment_index = 0
 
   if mod.selected_unit_slot ~= "none" then
@@ -848,6 +849,7 @@ mod.update_preview_attachment_index = function(self)
 
       if index == mod.selected_attachment_index then
         mod.selected_attachment_index = index
+        mod.current_preview_attach_display = mod:shorten_item_name(attach)
         mod:preview_attachment(attach)
         return
       end

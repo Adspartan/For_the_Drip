@@ -68,6 +68,13 @@ mod.selected_preset = "none"
 mod.selected_preset_name = "none"
 mod.attachment_filter = ""
 mod.selected_attachment_index = 0
+mod.attachment_count = 0
+mod.selected_unit_slot = "none"
+mod.selected_extra_attach = ""
+mod.current_preview_attach_display = ""
+mod.selected_hair_color_index = 1
+
+local update_attachment_count = true
 local selected_preset_index = 0
 
 local color_index = 1
@@ -111,10 +118,6 @@ local apply_changes_on_change = function()
     apply_changes()
   end
 end
-
-mod.selected_unit_slot = "none"
-mod.selected_extra_attach = ""
-mod.selected_hair_color_index = 1
 
 ImguiDripEditor.body_customization_ui = function(self)
   local x = Imgui.get_window_size()
@@ -234,6 +237,7 @@ ImguiDripEditor.slot_customization_ui = function(self)
 
         if old_selected_slot ~= slot then
           mod:reset_selected_attachment()
+          update_attachment_count = true
 
           if old_selected_slot ~= "none" then
             if old_selected_slot == "slot_gear_head" then
@@ -442,8 +446,24 @@ ImguiDripEditor.slot_customization_ui = function(self)
           local old_filter = mod.attachment_filter
           mod.attachment_filter = Imgui.input_text("Filter", mod.attachment_filter)
 
-          if old_filter ~= mod.attachment_filter then
+          if old_filter ~= mod.attachment_filter or update_attachment_count then
             mod.selected_attachment_index = 0
+            mod.attachment_count = 0
+
+            local breed = mod:persistent_table("data").breed
+            local t = mod.attachment_per_slot_per_breed[breed] and mod.attachment_per_slot_per_breed[breed][mod.selected_unit_slot] or {}
+
+            local count = 0
+
+            for k, attach in pairs(t) do
+              if mod.attachment_filter == "" or string.find(attach, mod.attachment_filter) then
+                count = count + 1
+              end
+            end
+
+            mod.attachment_count = count
+
+            update_attachment_count = false
           end
 
           Imgui.spacing()
@@ -461,12 +481,15 @@ ImguiDripEditor.slot_customization_ui = function(self)
 
                 if Imgui.selectable(attach, attach == mod.selected_extra_attach) then
                   mod.selected_attachment_index = index
+                  mod.current_preview_attach_display = mod:shorten_item_name(attach)
                   mod:preview_attachment(attach)
                 end
               end
             end
 
             Imgui.end_combo()
+
+            mod.attachment_count = index
           else
             Imgui.same_line()
             Imgui.spacing()
@@ -494,6 +517,8 @@ ImguiDripEditor.slot_customization_ui = function(self)
               mod:reset_selected_attachment()
             end
           end
+
+          Imgui.text("Attachment: "..mod.selected_attachment_index.."/"..mod.attachment_count.."   "..mod.current_preview_attach_display)
         end
 
         if mod.selected_extra_attach ~= "" then
@@ -513,6 +538,7 @@ ImguiDripEditor.slot_customization_ui = function(self)
             end)
 
             mod.selected_extra_attach = ""
+            mod.current_preview_attach_display = ""
           end
         end
 
