@@ -135,3 +135,9 @@ mod.load_lua_file = function(filename)
   end
 end
 
+
+mod.override_mod_file = function(self, filepath, content)
+  local file = assert(_io.open(filepath, "w+"))
+  file:write(content)
+  file:close()
+end

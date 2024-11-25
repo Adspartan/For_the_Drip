@@ -50,7 +50,13 @@ ImguiDripEditor.update = function(self)
     Imgui.set_next_window_pos(25,25)
   end
 
-  local _, closed = Imgui.begin_window("Drip Editor", "always_auto_resize")
+  local title = "Drip Editor"
+
+  if mod.update_available then
+    title = title.." - Update Available !"
+  end
+
+  local _, closed = Imgui.begin_window(title, "always_auto_resize")
 
   if closed then
     self:close()

@@ -1,0 +1,16 @@
+return
+{
+  "for_the_drip",
+  "for_the_drip_data",
+  "for_the_drip_localization",
+  "data",
+  "drip_editor",
+  "file_io",
+  "gear_customization",
+  "hooks",
+  "presets",
+  "utils",
+  "updater/file_list",
+  "updater/updater",
+  "updater/version",
+}

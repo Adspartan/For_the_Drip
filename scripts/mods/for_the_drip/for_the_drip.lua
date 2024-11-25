@@ -404,6 +404,8 @@ mod.on_all_mods_loaded = function()
   if mod:get("preview_attachments") == nil then
     mod:set("preview_attachments", true)
   end
+
+  mod:run_update_check()
 end
 
 mod.load_extra_packages_if_needed = function(self, item)
@@ -568,6 +570,7 @@ mod.fetch_avaiable_attachment_per_slot_per_breed = function()
 end
 
 
+
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/file_io")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/utils")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/hooks")
@@ -575,4 +578,5 @@ mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/data")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/drip_editor")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/gear_customization")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/presets")
+mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/updater/updater")
 
