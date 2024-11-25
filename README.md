@@ -1,6 +1,7 @@
 # Why isn't the mod on nexus ?
 Because there's still some issues with it, they are getting sorted out but I don't want to upload an unstable mod there.
 
+As of v0.12.0 the mod has an update checker and updater, so you'll be warned when there is a new update available and can update by typing `/ftd_update` in game.
 
 
 # Support
