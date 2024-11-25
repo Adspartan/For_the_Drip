@@ -1,5 +1,7 @@
 local mod = get_mod("for_the_drip")
 
+local Promise = require("scripts/foundation/utilities/promise")
+
 mod.update_available = false
 
 local mod_folder = "./../mods/for_the_drip/scripts/mods/for_the_drip/"
@@ -10,7 +12,7 @@ mod.get_current_version = function(self)
   return mod:io_read_content("for_the_drip/scripts/mods/for_the_drip/updater/version")
 end
 
-mod.download_lua_file = function(self, url, name)
+mod.download_lua_file = function(self, url)
   return Managers.backend:url_request(url, {
 		require_auth = false,
 	}):next(function(data) return data.body end, function() return false end)
@@ -52,7 +54,9 @@ end
 mod.run_update_check = function(self)
   mod:check_for_update():next(function()
     if mod.update_available then
-      Promise.delay(10):next(function() mod:echo("FTD Update available,\nuse the command /ftd_update to auto update on download it from https://github.com/Adspartan/For_the_Drip/releases/latest") end)
+      Promise.delay(10):next(function()
+        mod:echo("FTD Update available,\nuse the command /ftd_update to auto update on download it from https://github.com/Adspartan/For_the_Drip/releases/latest")
+      end)
     end
   end)
 end
@@ -62,7 +66,7 @@ mod.get_update_file_list = function()
     if not result then
       return nil
     else
-      return Mods.lua.loadstring(result), name
+      return Mods.lua.loadstring(result)()
     end
   end)
 end
@@ -77,28 +81,29 @@ mod:command("ftd_update", "Update For the Drip", function()
   end)
 end)
 
+mod.repo_files_content = {}
+
+mod.store_repo_file_content = function(self, name, content)
+  mod.repo_files_content[name] = content
+end
+
 mod.update_mod_files = function(self)
   mod:echo("Updating")
 
   mod:get_update_file_list():next(function(file_list)
     if file_list then
-      local files_content = {}
+      mod.repo_files_content = {}
       local dl_promises = {}
       local dl_failed = false
 
       for k, name in pairs(file_list) do
-        dl_promises[#dl_promises + 1] = mod:download_lua_file(mod_files_url..name..".lua", name):next(function(content, name)
-          if not content then
-            dl_failed = true
-          else
-            files_content[name] = content
-          end
-        end)
+        dl_promises[#dl_promises + 1] = mod:download_lua_file(mod_files_url..name..".lua"):next(callback(self, "store_repo_file_content", name), function() dl_failed = true end)
       end
+
 
       Promise.all(unpack(dl_promises)):next(function()
         if not dl_failed then
-          for name, content in pairs(files_content) do
+          for name, content in pairs(mod.repo_files_content) do
             mod:override_mod_file(mod_folder..name..".lua", content)
           end
 
