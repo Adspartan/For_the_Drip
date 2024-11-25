@@ -415,6 +415,8 @@ mod.on_all_mods_loaded = function()
 
   mod:reset_editor_nav_combos()
   mod:run_update_check()
+
+  mod.current_version = mod:get_current_version() or ""
 end
 
 mod.load_extra_packages_if_needed = function(self, item)

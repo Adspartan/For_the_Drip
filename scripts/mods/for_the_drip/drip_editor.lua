@@ -61,6 +61,10 @@ ImguiDripEditor.update = function(self)
 
   local title = "Drip Editor"
 
+  if mod.current_version and mod.current_version ~= "" then
+    title = title.." v"..mod.current_version
+  end
+
   if mod.update_available then
     title = title.." - Update Available !"
   end

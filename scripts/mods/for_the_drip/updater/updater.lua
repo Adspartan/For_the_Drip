@@ -107,7 +107,8 @@ mod.update_mod_files = function(self)
             mod:override_mod_file(mod_folder..name..".lua", content)
           end
 
-          mod:echo("New version: "..mod:get_current_version())
+          mod.current_version = mod:get_current_version()
+          mod:echo("New version: "..mod.current_version)
           mod:echo("You can now reload your mods or restart the game !")
 
           mod.update_available = false
