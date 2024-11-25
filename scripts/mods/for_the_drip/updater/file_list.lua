@@ -11,6 +11,8 @@ return
   "hooks",
   "presets",
   "utils",
+  "updater/changelogs",
+  "updater/changelogs_ui",
   "updater/file_list",
   "updater/updater",
   "updater/version",

@@ -415,7 +415,7 @@ mod.on_all_mods_loaded = function()
 
   mod:reset_editor_nav_combos()
   mod:run_update_check()
-
+  mod:parse_changelogs()
   mod.current_version = mod:get_current_version() or ""
 end
 
@@ -591,4 +591,5 @@ mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/drip_editor_utils")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/gear_customization")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/presets")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/updater/updater")
+mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/updater/changelogs_ui")
 

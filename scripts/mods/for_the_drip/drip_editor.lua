@@ -57,6 +57,8 @@ ImguiDripEditor.update = function(self)
 
     reset_ingui_pos = false
     Imgui.set_next_window_pos(25,25)
+
+    mod:reset_changelogs_ui_pos()
   end
 
   local title = "Drip Editor"
@@ -73,6 +75,7 @@ ImguiDripEditor.update = function(self)
 
   if closed then
     self:close()
+    mod:close_changelogs_ui()
   else
     self:ui_content()
   end
@@ -867,6 +870,15 @@ ImguiDripEditor.ui_content = function(self)
   if Imgui.button("Reset all slots",  x / 2 - 20, 30) then
     mod:reset_visual_loadout()
   end
+
+  Imgui.separator()
+
+  Imgui.spacing()
+  Imgui.same_line()
+
+  if Imgui.button("Changelogs",  x - 35, 30) then
+    mod:toggle_changelogs_ui()
+  end
 end
 
 
@@ -894,5 +906,6 @@ end
 mod.update = function()
   if show_editor then
     editor:update()
+    mod:update_changelogs_ui()
   end
 end
