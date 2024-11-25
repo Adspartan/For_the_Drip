@@ -19,6 +19,8 @@ mod.presets_info =
 }
 
 mod.reset_visual_loadout = function()
+  mod:reset_editor_nav_combos()
+
   mod.selected_unit_slot = "none"
   mod.selected_preset = "none"
   mod.selected_preset_name = ""
@@ -298,6 +300,8 @@ mod.refresh_all_gear_slots = function()
 end
 
 mod.reset_slot = function(self, slot_name)
+  mod:reset_editor_nav_combos()
+
   mod.current_slots_data[slot_name] = {}
 
   local items_to_reset = {}
@@ -405,6 +409,11 @@ mod.on_all_mods_loaded = function()
     mod:set("preview_attachments", true)
   end
 
+  if mod:get("apply_masks_on_change") == nil then
+    mod:set("apply_masks_on_change", true)
+  end
+
+  mod:reset_editor_nav_combos()
   mod:run_update_check()
 end
 
@@ -576,6 +585,7 @@ mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/utils")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/hooks")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/data")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/drip_editor")
+mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/drip_editor_utils")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/gear_customization")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/presets")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/updater/updater")

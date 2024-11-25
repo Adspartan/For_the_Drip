@@ -15,6 +15,15 @@ local body_options_header = true
 local presets_header = true
 local unit_header = true
 
+mod.reset_editor_nav_combos = function(self)
+  mod.mask_torso_combo = nil
+  mod.mask_arms_combo = nil
+  mod.mask_legs_combo = nil
+  mod.mask_face_combo = nil
+  mod.mask_hair_combo = nil
+  mod.mask_facial_hair_combo = nil
+end
+
 mod.reset_window_pos = function()
   reset_ingui_pos = true
 end
@@ -282,16 +291,11 @@ ImguiDripEditor.slot_customization_ui = function(self)
 
           Imgui.same_line()
 
-          if Imgui.begin_combo("Body Mask", data.mask_torso) then
-            for k,mask in pairs(mod.masks_per_slots.slot_body_torso) do
-              if Imgui.selectable(mask, mask == data.mask_torso) then
-                data.mask_torso = mask
-              end
-            end
-
-            Imgui.end_combo()
+          if not mod.mask_torso_combo then
+            mod.mask_torso_combo = mod:create_nav_combo("Body Mask", mod.masks_per_slots.slot_body_torso, data.mask_torso, mod.on_mask_changed)
           end
 
+          data.mask_torso = mod.mask_torso_combo:display()
 
           Imgui.spacing()
           Imgui.same_line()
@@ -299,15 +303,11 @@ ImguiDripEditor.slot_customization_ui = function(self)
           data.hide_arms = Imgui.checkbox("Hide Arms##hide_arms_btn", data.hide_arms)
           Imgui.same_line()
 
-          if Imgui.begin_combo("Arms Mask",data.mask_arms) then
-            for k,mask in pairs(mod.masks_per_slots.slot_body_arms) do
-              if Imgui.selectable(mask, mask == data.mask_arms) then
-              data.mask_arms = mask
-              end
-            end
-
-            Imgui.end_combo()
+          if not mod.mask_arms_combo then
+            mod.mask_arms_combo = mod:create_nav_combo("Arms Mask", mod.masks_per_slots.slot_body_arms, data.mask_arms, mod.on_mask_changed)
           end
+
+          data.mask_arms = mod.mask_arms_combo:display()
 
           Imgui.separator()
         end
@@ -319,15 +319,11 @@ ImguiDripEditor.slot_customization_ui = function(self)
 
           Imgui.same_line()
 
-          if Imgui.begin_combo("Legs Mask",data.mask_legs) then
-            for k,mask in pairs(mod.masks_per_slots.slot_body_legs) do
-              if Imgui.selectable(mask, mask == data.mask_legs) then
-              data.mask_legs = mask
-              end
-            end
-
-            Imgui.end_combo()
+          if not mod.mask_legs_combo then
+            mod.mask_legs_combo = mod:create_nav_combo("Legs Mask", mod.masks_per_slots.slot_body_legs, data.mask_legs, mod.on_mask_changed)
           end
+
+          data.mask_legs = mod.mask_legs_combo:display()
 
           Imgui.separator()
         end
@@ -354,57 +350,37 @@ ImguiDripEditor.slot_customization_ui = function(self)
           Imgui.spacing()
           Imgui.same_line()
 
-          if Imgui.begin_combo("Face Mask", data.mask_face) then
-            for k,mask in pairs(mod.face_masks) do
-              if Imgui.selectable(mask, mask == data.mask_face) then
-                data.mask_face = mask
-              end
-            end
-
-            Imgui.end_combo()
+          if not mod.mask_face_combo then
+            mod.mask_face_combo = mod:create_nav_combo("Face Mask", mod.face_masks, data.mask_face, mod.on_mask_changed)
           end
+
+          data.mask_face = mod.mask_face_combo:display()
 
           Imgui.spacing()
           Imgui.same_line()
 
-          if Imgui.begin_combo("Hair Mask", data.mask_hair) then
+          if not mod.mask_hair_combo then
             if mod:persistent_table("data").breed == "ogryn" then
-              for k,mask in pairs(mod.ogryn_hair_masks) do
-                if Imgui.selectable(mask, mask == data.mask_hair) then
-                data.mask_hair = mask
-                end
-              end
+              mod.mask_hair_combo = mod:create_nav_combo("Hair Mask", mod.ogryn_hair_masks, data.mask_hair, mod.on_mask_changed)
             else
-              for k,mask in pairs(mod.human_hair_masks) do
-                if Imgui.selectable(mask, mask == data.mask_hair) then
-                data.mask_hair = mask
-                end
-              end
+              mod.mask_hair_combo = mod:create_nav_combo("Hair Mask", mod.human_hair_masks, data.mask_hair, mod.on_mask_changed)
             end
-
-            Imgui.end_combo()
           end
+
+          data.mask_hair = mod.mask_hair_combo:display()
 
           Imgui.spacing()
           Imgui.same_line()
 
-          if Imgui.begin_combo("Face Hair Mask", data.mask_facial_hair) then
+          if not mod.mask_facial_hair_combo then
             if mod:persistent_table("data").breed == "ogryn" then
-              for k,mask in pairs(mod.ogryn_face_hair_masks) do
-                if Imgui.selectable(mask, mask == data.mask_hair) then
-                data.mask_hair = mask
-                end
-              end
+              mod.mask_facial_hair_combo = mod:create_nav_combo("Face Hair Mask", mod.ogryn_face_hair_masks, data.mask_facial_hair, mod.on_mask_changed)
             else
-              for k,mask in pairs(mod.human_face_hair_masks) do
-                if Imgui.selectable(mask, mask == data.mask_hair) then
-                data.mask_hair = mask
-                end
-              end
+              mod.mask_facial_hair_combo = mod:create_nav_combo("Face Hair Mask", mod.human_face_hair_masks, data.mask_facial_hair, mod.on_mask_changed)
             end
-
-            Imgui.end_combo()
           end
+
+          data.mask_facial_hair = mod.mask_facial_hair_combo:display()
 
           Imgui.separator()
         end
@@ -839,6 +815,10 @@ ImguiDripEditor.ui_content = function(self)
     Imgui.spacing()
     Imgui.same_line()
     mod:set("apply_mat_on_index_change", Imgui.checkbox(mod:localize("apply_mat_on_index_change"), mod:get("apply_mat_on_index_change")))
+
+    Imgui.spacing()
+    Imgui.same_line()
+    mod:set("apply_mask_on_change", Imgui.checkbox("Apply masks on change"), mod:get("apply_mask_on_change"))
 
     Imgui.spacing()
     Imgui.same_line()

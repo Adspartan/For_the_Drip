@@ -111,11 +111,14 @@ local decal_material_types =
 mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_face_mask", function(instance)
   if instance then
     for k,v in pairs(instance) do
-      if not string.match(k, "debug") then
+      if (not string.match(k, "debug")) and (not string.match(k, "mask_face_none")) then
         table.insert(mod.face_masks, k)
       end
     end
   end
+
+  table.sort(mod.face_masks)
+  table.insert(mod.face_masks, 1, "mask_face_none")
 end)
 
 mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_hair_headgear_mask", function(instance)
