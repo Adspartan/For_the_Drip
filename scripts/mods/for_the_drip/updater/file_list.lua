@@ -5,6 +5,7 @@ return
   "for_the_drip_localization",
   "data",
   "drip_editor",
+  "drip_editor_utils",
   "file_io",
   "gear_customization",
   "hooks",
