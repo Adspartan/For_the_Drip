@@ -14,6 +14,18 @@ mod.split_str = function(self, str, sep)
   return res
 end
 
+string.starts_with_any = function(str, ...)
+  local t = {...}
+
+  for k, v in pairs(t) do
+    if string.starts_with(str, v) then
+      return true
+    end
+  end
+
+  return false
+end
+
 string.contains_any = function(str, ...)
   local t = {...}
 

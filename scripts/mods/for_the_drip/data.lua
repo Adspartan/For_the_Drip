@@ -37,40 +37,6 @@ mod.ogryn_hair_masks = {}
 mod.ogryn_face_hair_masks = {}
 
 mod.masks_per_slots = {}
-mod.masks_per_slots["slot_body_torso"] =
-{
-  "mask_default",
-  "mask_torso_keep_collar",
-  "mask_torso_keep_pecs",
-  "mask_torso_keep_armpits"
-}
-
-mod.masks_per_slots["slot_body_legs"] =
-{
-  "mask_default",
-  "mask_legs_keep_knees_and_shins",
-  "mask_legs_keep_knees",
-  "mask_feet_and_shins_keep_knees_and_thighs",
-  "mask_feet"
-}
-mod.masks_per_slots["slot_body_arms"] =
-{
-  "mask_default",
-  "mask_arms_keep_forearms",
-  "mask_hands",
-  "mask_upperarms_hands_keep_wrist",
-  "mask_arms_keep_forearms_and_hands",
-  "mask_arms_keep_wrist_and_hands",
-  "mask_arms_keep_hands",
-  "mask_arms_keep_fingers",
-  "mask_arms_keep_finger_tops",
-  "mask_arms_shoulders_01",
-  "mask_arms_shoulders_02",
-  "mask_arms_shoulders_03",
-  "mask_arms_keep_upperarms_forearms",
-  "mask_arms_hands_keep_wrist"
-}
-
 mod.available_colors = {}
 mod.available_colors_textures = {}
 
@@ -108,46 +74,56 @@ local decal_material_types =
   "oxidized"
 }
 
-mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_face_mask", function(instance)
-  if instance then
-    for k,v in pairs(instance) do
-      if (not string.match(k, "debug")) and (not string.match(k, "mask_face_none")) then
-        table.insert(mod.face_masks, k)
-      end
+-- ... = filters
+mod.filter_masks = function(self, input, default_mask, ...)
+  local masks = {}
+
+  for k,v in pairs(input) do
+    if (not string.match(k, "debug")) and k ~= default_mask and string.starts_with_any(k, ...) then
+      table.insert(masks, k)
     end
   end
 
-  table.sort(mod.face_masks)
-  table.insert(mod.face_masks, 1, "mask_face_none")
+  table.sort(masks)
+  table.insert(masks, 1, default_mask)
+
+  return masks
+end
+
+mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_base_body_mask", function(instance)
+  if instance then
+    -- custom
+    instance["mask_feet"] =
+    {
+      property_overrides =
+      {
+        mask_top_bottom =
+        {
+          0.2,
+          0
+        }
+      }
+    }
+
+    mod.masks_per_slots["slot_body_torso"] = mod:filter_masks(instance, "mask_default", "mask_torso_")
+    mod.masks_per_slots["slot_body_arms"] = mod:filter_masks(instance, "mask_default", "mask_arms_", "mask_hands", "mask_upperarms", "mask_half_upperarms")
+    mod.masks_per_slots["slot_body_legs"] = mod:filter_masks(instance, "mask_default", "mask_legs", "mask_feet")
+  end
+end)
+
+mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_face_mask", function(instance)
+  if instance then
+    mod.face_masks = mod:filter_masks(instance, "mask_face_none", "mask_")
+  end
 end)
 
 mod:hook_require("scripts/settings/equipment/item_material_overrides/player_material_overrides_hair_headgear_mask", function(instance)
   if instance then
-    for k,v in pairs(instance) do
-      if not string.match(k, "debug") then
-        if string.starts_with(k, "facial_hair_") then
-          table.insert(mod.human_face_hair_masks, k)
-        elseif string.starts_with(k, "hair_") and k ~= "hair_no_mask" then -- default already added
-          table.insert(mod.human_hair_masks, k)
-        elseif string.starts_with(k, "ogryn_facial_hair") then
-          table.insert(mod.ogryn_face_hair_masks, k)
-        elseif string.starts_with(k, "ogryn_hair_") then
-          table.insert(mod.ogryn_hair_masks, k)
-        end
-      end
-    end
+    mod.human_hair_masks = mod:filter_masks(instance, "hair_no_mask", "hair_")
+    mod.ogryn_hair_masks = mod:filter_masks(instance, "hair_no_mask", "ogryn_hair_")
+    mod.human_face_hair_masks = mod:filter_masks(instance, "facial_hair_no_mask", "facial_hair_")
+    mod.ogryn_face_hair_masks = mod:filter_masks(instance, "facial_hair_no_mask", "ogryn_facial_hair_")
   end
-
-  table.sort(mod.human_hair_masks)
-  table.sort(mod.human_face_hair_masks)
-  table.sort(mod.ogryn_hair_masks)
-  table.sort(mod.ogryn_face_hair_masks)
-
-  -- add the default ones in the first spot
-  table.insert(mod.human_hair_masks, 1, "hair_no_mask")
-  table.insert(mod.human_face_hair_masks, 1, "facial_hair_no_mask")
-  table.insert(mod.ogryn_hair_masks, 1, "hair_no_mask")
-  table.insert(mod.ogryn_face_hair_masks, 1, "facial_hair_no_mask")
 end)
 
 mod:hook_require("scripts/settings/equipment/item_material_overrides/item_material_overrides_gear_colors", function(instance)
@@ -234,17 +210,3 @@ mod:hook_require("scripts/settings/equipment/item_material_overrides/player_mate
 
   table.sort(mod.decal_materials)
 end)
-
-mod.add_custom_body_masks = function()
-  ItemMaterialOverrides["mask_feet"] =
-  {
-    property_overrides =
-    {
-      mask_top_bottom =
-      {
-        0.2,
-        0
-      }
-    }
-  }
-end

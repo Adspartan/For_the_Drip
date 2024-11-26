@@ -6,6 +6,7 @@ return
   {
     "Add update check when opening the UI with a 6min cooldown",
     "Fix 'apply masks on change' setting",
+    "Auto load all body masks from the game to always be up to date",
   },
   ["0.12.2"] =
   {

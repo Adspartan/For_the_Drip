@@ -387,8 +387,6 @@ mod.on_all_mods_loaded = function()
     mod:persistent_table("data").head_gear_name = ""
   end
 
-  mod:add_custom_body_masks()
-
   mod.weapon_customization = get_mod("weapon_customization")
 
   Managers.backend.interfaces.characters:fetch():next(function(characters)
