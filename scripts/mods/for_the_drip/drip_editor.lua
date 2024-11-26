@@ -825,7 +825,7 @@ ImguiDripEditor.ui_content = function(self)
 
     Imgui.spacing()
     Imgui.same_line()
-    mod:set("apply_mask_on_change", Imgui.checkbox("Apply masks on change"), mod:get("apply_mask_on_change"))
+    mod:set("apply_masks_on_change", Imgui.checkbox("Apply masks on change", mod:get("apply_masks_on_change")))
 
     Imgui.spacing()
     Imgui.same_line()

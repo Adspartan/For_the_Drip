@@ -5,6 +5,7 @@ return
   ["0.12.3"] =
   {
     "Add update check when opening the UI with a 6min cooldown",
+    "Fix 'apply masks on change' setting",
   },
   ["0.12.2"] =
   {
