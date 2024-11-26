@@ -2,6 +2,10 @@ local nl_1 ="\n    "
 local nl_2 ="\n      "
 return
 {
+  ["0.12.3"] =
+  {
+    "Add update check when opening the UI with a 6min cooldown",
+  },
   ["0.12.2"] =
   {
     "Add changelogs",
@@ -11,6 +15,7 @@ return
   {
     "Add navigation buttons for the masks",
     "Add setting to auto apply masks changes",
+    "Fix face hair masks saving in the wrong variable",
   },
   ["0.12.0"] =
   {

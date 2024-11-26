@@ -84,7 +84,7 @@ mod.reset_changelogs_ui_pos = function()
 end
 
 mod.update_changelogs_ui = function(self)
-  if changelogs_window._show then
+  if changelogs_window and changelogs_window._show then
     if reset_pos then
       Imgui.set_next_window_pos(200,25)
     end

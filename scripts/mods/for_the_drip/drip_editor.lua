@@ -897,6 +897,9 @@ mod.toggle_ui = function()
   else
     editor:open()
 
+    -- check for updates when opening the editor, 6min cooldown
+    mod:auto_check_for_update_if_on_cd()
+
     if (not mod.attachment_per_slot_per_breed) and (not mod.is_fetching_attachments) then
       mod:fetch_avaiable_attachment_per_slot_per_breed()
     end

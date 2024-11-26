@@ -1,12 +1,27 @@
 local mod = get_mod("for_the_drip")
 
 local Promise = require("scripts/foundation/utilities/promise")
+local FixedFrame = require("scripts/utilities/fixed_frame")
 
 mod.update_available = false
+mod.last_update_check = 0
 
 local mod_folder = "./../mods/for_the_drip/scripts/mods/for_the_drip/"
 local mod_files_url = "https://raw.githubusercontent.com/Adspartan/For_the_Drip/refs/heads/main/scripts/mods/for_the_drip/"
 
+mod.refresh_last_update_check = function(self)
+  mod.last_update_check = Managers.time:time("main") or 1
+end
+
+mod.auto_check_for_update_if_on_cd = function(self)
+  local t = Managers.time:time("main")
+
+  if t and (t - mod.last_update_check) > 360 then
+    return true
+  else
+    return false
+  end
+end
 
 mod.get_current_version = function(self)
   return mod:io_read_content("for_the_drip/scripts/mods/for_the_drip/updater/version")
@@ -20,6 +35,8 @@ end
 
 mod.check_for_update = function(self)
   local current_version = mod:get_current_version()
+
+  mod:refresh_last_update_check()
 
   return mod:download_lua_file(mod_files_url.."updater/version.lua"):next(function(result)
     if result then
