@@ -10,16 +10,17 @@ end
 
 local NavigationCombo = class("NavigationCombo")
 
-mod.create_nav_combo = function(self, title, elements, initial_value, value_changed_cb)
-  return NavigationCombo:new(title, elements, initial_value, value_changed_cb)
+mod.create_nav_combo = function(self, title, elements, initial_value, value_changed_cb, reset_value)
+  return NavigationCombo:new(title, elements, initial_value, value_changed_cb, reset_value)
 end
 
-NavigationCombo.init = function(self, title, elements, initial_value, value_changed_cb)
+NavigationCombo.init = function(self, title, elements, initial_value, value_changed_cb, reset_value)
   self._title = title
   self._elements = table.clone(elements)
   self._max_index = #elements
   self._value = initial_value
   self._value_changed_cb = value_changed_cb
+  self._reset_value = reset_value
 
   self._index = 0
 
@@ -32,8 +33,13 @@ NavigationCombo.init = function(self, title, elements, initial_value, value_chan
 end
 
 NavigationCombo.reset_selection = function(self)
-  self._index = 1
-  self._value = self._elements[1]
+  if self._reset_value then
+    self._index = 0
+    self._value = self._reset_value
+  else
+    self._index = 1
+    self._value = self._elements[1]
+  end
 
   self:on_value_changed()
 end

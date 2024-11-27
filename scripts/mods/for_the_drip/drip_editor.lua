@@ -16,12 +16,17 @@ local presets_header = true
 local unit_header = true
 
 mod.reset_editor_nav_combos = function(self)
+  mod.color_material_combo = nil
+  mod.pattern_material_combo = nil
+  mod.gear_material_combo = nil
+
   mod.mask_torso_combo = nil
   mod.mask_arms_combo = nil
   mod.mask_legs_combo = nil
   mod.mask_face_combo = nil
   mod.mask_hair_combo = nil
   mod.mask_facial_hair_combo = nil
+
   mod.extra_attachments_combo = nil
 end
 
@@ -98,10 +103,6 @@ mod.selected_hair_color_index = 1
 
 local selected_preset_index = 0
 
-local color_index = 1
-local pattern_index = 1
-local gear_index = 1
-
 mod.slots_selection_status = {}
 
 local reset_selected_slots = false
@@ -113,6 +114,13 @@ local apply_changes = function()
     if checked then
       if reset_selected_slots then
         mod:reset_slot(slot)
+      end
+
+      -- update the values, the UI will always have the most up to date ones
+      if mod.color_material_combo then
+        mod.selected_color_material = mod.color_material_combo._value
+        mod.selected_gear_material = mod.gear_material_combo._value
+        mod.selected_pattern_material = mod.pattern_material_combo._value
       end
 
       if mod.selected_color_material ~= "none" then
@@ -508,172 +516,20 @@ ImguiDripEditor.ui_content = function(self)
     Imgui.spacing()
     Imgui.same_line()
 
-    if Imgui.begin_combo("Colors", mod.selected_color_material) then
-
-      if Imgui.selectable("none", mod.selected_color_material == "none") then
-        mod.selected_color_material = "none"
-        color_index = 1
-        apply_changes_on_change()
-      end
-
-      for k,v in ipairs(mod.color_materials) do
-        if Imgui.selectable(v, v == mod.selected_color_material)  then
-          mod.selected_color_material = v
-          color_index = k+1
-          apply_changes_on_change()
-        end
-      end
-
-      Imgui.end_combo()
-    else
-      Imgui.same_line(30)
-
-      if Imgui.button("<##color") then
-        color_index = color_index - 1
-
-        if color_index < 1 then
-          color_index = #mod.color_materials + 1
-        end
-
-        if color_index == 1 then
-          mod.selected_color_material = "none"
-        else
-          mod.selected_color_material = mod.color_materials[color_index-1]
-        end
-
-        apply_changes_on_change()
-      end
-
-      Imgui.same_line()
-      Imgui.next_column()
-
-      if Imgui.button(">##color") then
-        color_index = color_index + 1
-
-        if color_index > #mod.color_materials + 1 then
-          color_index = 1
-        end
-
-        if color_index == 1 then
-          mod.selected_color_material = "none"
-        else
-          mod.selected_color_material = mod.color_materials[color_index-1]
-        end
-
-        apply_changes_on_change()
-      end
+    -- all 3 are reset at the same time
+    if not mod.color_material_combo then
+      mod.color_material_combo =   mod:create_nav_combo("Colors   ", mod.color_materials, mod.selected_color_material, apply_changes_on_change, "none")
+      mod.gear_material_combo =    mod:create_nav_combo("Materials", mod.gear_materials, mod.selected_gear_material, apply_changes_on_change, "none")
+      mod.pattern_material_combo = mod:create_nav_combo("Patterns ", mod.pattern_materials, mod.selected_pattern_material, apply_changes_on_change, "none")
     end
 
+    mod.selected_color_material = mod.color_material_combo:display()
     Imgui.spacing()
     Imgui.same_line()
-
-    if Imgui.begin_combo("Materials", mod.selected_gear_material) then
-      if Imgui.selectable("none", mod.selected_gear_material == "none") then
-        mod.selected_gear_material = "none"
-        gear_index = 1
-        apply_changes_on_change()
-      end
-
-      for k,v in ipairs(mod.gear_materials) do
-        if Imgui.selectable(v, v == mod.selected_gear_material)  then
-          mod.selected_gear_material = v
-          gear_index = k+1
-          apply_changes_on_change()
-        end
-      end
-
-      Imgui.end_combo()
-    else
-      Imgui.same_line(9)
-      if Imgui.button("<##material") then
-        gear_index = gear_index - 1
-
-        if gear_index < 1 then
-          gear_index = #mod.gear_materials + 1
-        end
-
-        if gear_index == 1 then
-          mod.selected_gear_material = "none"
-        else
-          mod.selected_gear_material = mod.gear_materials[gear_index-1]
-        end
-
-        apply_changes_on_change()
-      end
-      Imgui.same_line()
-      if Imgui.button(">##material") then
-        gear_index = gear_index + 1
-
-        if gear_index > #mod.gear_materials + 1 then
-          gear_index = 1
-        end
-
-        if gear_index == 1 then
-          mod.selected_gear_material = "none"
-        else
-          mod.selected_gear_material = mod.gear_materials[gear_index-1]
-        end
-
-        apply_changes_on_change()
-      end
-    end
-
+    mod.selected_gear_material = mod.gear_material_combo:display()
     Imgui.spacing()
     Imgui.same_line()
-
-    if Imgui.begin_combo("Patterns", mod.selected_pattern_material) then
-      if Imgui.selectable("none", mod.selected_pattern_material == "none") then
-        mod.selected_pattern_material = "none"
-        pattern_index = 1
-        apply_changes_on_change()
-      end
-
-      for k,v in ipairs(mod.pattern_materials) do
-        if Imgui.selectable(v, v == mod.selected_pattern_material)  then
-          mod.selected_pattern_material = v
-          pattern_index = k+1
-          apply_changes_on_change()
-        end
-      end
-
-      Imgui.end_combo()
-    else
-      Imgui.same_line(16)
-
-      if Imgui.button("<##pattern") then
-        pattern_index = pattern_index - 1
-
-        if pattern_index < 1 then
-          pattern_index = #mod.pattern_materials + 1
-        end
-
-        if pattern_index == 1 then
-          mod.selected_pattern_material = "none"
-        else
-          mod.selected_pattern_material = mod.pattern_materials[pattern_index-1]
-        end
-
-        apply_changes_on_change()
-      end
-
-      Imgui.same_line()
-
-      if Imgui.button(">##pattern") then
-        pattern_index = pattern_index + 1
-
-        if pattern_index > #mod.pattern_materials + 1 then
-          pattern_index = 1
-        end
-
-        if pattern_index == 1 then
-          mod.selected_pattern_material = "none"
-        else
-          mod.selected_pattern_material = mod.pattern_materials[pattern_index-1]
-        end
-
-        apply_changes_on_change()
-      end
-    end
+    mod.selected_pattern_material = mod.pattern_material_combo:display()
 
     Imgui.separator()
   end
