@@ -22,6 +22,7 @@ mod.reset_editor_nav_combos = function(self)
   mod.mask_face_combo = nil
   mod.mask_hair_combo = nil
   mod.mask_facial_hair_combo = nil
+  mod.extra_attachments_combo = nil
 end
 
 mod.reset_window_pos = function()
@@ -88,15 +89,13 @@ mod.selected_pattern_material = "none"
 mod.selected_gear_material = "none"
 mod.selected_preset = "none"
 mod.selected_preset_name = "none"
-mod.attachment_filter = ""
+mod.decals_filter = ""
 mod.selected_attachment_index = 0
-mod.attachment_count = 0
 mod.selected_unit_slot = "none"
 mod.selected_extra_attach = ""
-mod.current_preview_attach_display = ""
+mod.selected_extra_decal = ""
 mod.selected_hair_color_index = 1
 
-local update_attachment_count = true
 local selected_preset_index = 0
 
 local color_index = 1
@@ -138,6 +137,12 @@ end
 local apply_changes_on_change = function()
   if mod:get("apply_mat_on_index_change") then
     apply_changes()
+  end
+end
+
+local extra_attach_change = function()
+  if mod.extra_attachments_combo then
+    mod:preview_attachment(mod.extra_attachments_combo._value)
   end
 end
 
@@ -259,7 +264,7 @@ ImguiDripEditor.slot_customization_ui = function(self)
 
         if old_selected_slot ~= slot then
           mod:reset_selected_attachment()
-          update_attachment_count = true
+          mod.extra_attachments_combo = nil
 
           if old_selected_slot ~= "none" then
             if old_selected_slot == "slot_gear_head" then
@@ -429,85 +434,15 @@ ImguiDripEditor.slot_customization_ui = function(self)
 
         if mod.attachment_per_slot_per_breed then
           Imgui.separator()
-          Imgui.spacing()
-          Imgui.same_line()
 
-          local old_filter = mod.attachment_filter
-          mod.attachment_filter = Imgui.input_text("Filter", mod.attachment_filter)
-
-          if old_filter ~= mod.attachment_filter or update_attachment_count then
-            mod.selected_attachment_index = 0
-            mod.attachment_count = 0
-
+          if not mod.extra_attachments_combo then
             local breed = mod:persistent_table("data").breed
-            local t = mod.attachment_per_slot_per_breed[breed] and mod.attachment_per_slot_per_breed[breed][mod.selected_unit_slot] or {}
+            local attach_list = mod.attachment_per_slot_per_breed[breed] and mod.attachment_per_slot_per_breed[breed][mod.selected_unit_slot] or {}
 
-            local count = 0
-
-            for k, attach in pairs(t) do
-              if mod.attachment_filter == "" or string.find(attach, mod.attachment_filter) then
-                count = count + 1
-              end
-            end
-
-            mod.attachment_count = count
-
-            update_attachment_count = false
+            mod.extra_attachments_combo = mod:create_filter_nav_combo("Extra Attachment", attach_list, "", extra_attach_change)
           end
 
-          Imgui.spacing()
-          Imgui.same_line()
-
-          if Imgui.begin_combo("Extra Attachment", mod.selected_extra_attach) then
-            local breed = mod:persistent_table("data").breed
-            local t = mod.attachment_per_slot_per_breed[breed] and mod.attachment_per_slot_per_breed[breed][mod.selected_unit_slot] or {}
-
-            local index = 0
-
-            for k, attach in pairs(t) do
-              if mod.attachment_filter == "" or string.find(attach, mod.attachment_filter) then
-                index = index + 1
-
-                if Imgui.selectable(attach, attach == mod.selected_extra_attach) then
-                  mod.selected_attachment_index = index
-                  mod.current_preview_attach_display = mod:shorten_item_name(attach)
-                  mod:preview_attachment(attach)
-                end
-              end
-            end
-
-            Imgui.end_combo()
-
-            mod.attachment_count = index
-          else
-            Imgui.same_line()
-            Imgui.spacing()
-            Imgui.same_line()
-
-            if Imgui.button("<##previous_attachment_btn") then
-              if mod.selected_attachment_index > 1 then
-                mod.selected_attachment_index = mod.selected_attachment_index - 1
-                mod:update_preview_attachment_index()
-              end
-            end
-
-            Imgui.same_line()
-
-            if Imgui.button(">##next_attachment_btn") then
-              mod.selected_attachment_index = mod.selected_attachment_index + 1
-              mod:update_preview_attachment_index()
-            end
-
-            Imgui.same_line()
-            Imgui.spacing()
-            Imgui.same_line()
-
-            if Imgui.button("x##clear_attach_name") then
-              mod:reset_selected_attachment()
-            end
-          end
-
-          Imgui.text("Attachment: "..mod.selected_attachment_index.."/"..mod.attachment_count.."   "..mod.current_preview_attach_display)
+          mod.selected_extra_attach = mod.extra_attachments_combo:display()
         end
 
         if mod.selected_extra_attach ~= "" then

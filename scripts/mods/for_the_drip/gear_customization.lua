@@ -827,8 +827,6 @@ end
 
 mod.reset_selected_attachment = function(self)
   mod.selected_extra_attach = ""
-  mod.current_preview_attach_display = ""
-  mod.selected_attachment_index = 0
 
   if mod.selected_unit_slot ~= "none" then
     mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
@@ -871,12 +869,20 @@ mod.update_preview_attachment_index = function(self)
 end
 
 mod.preview_attachment = function(self, item_name)
-  if mod:get("preview_attachments") then
-    mod:load_item_packages(MasterItems.get_item(item_name), function()
+  if item_name and item_name ~= "" then
+    if mod:get("preview_attachments") then
+      mod:load_item_packages(MasterItems.get_item(item_name), function()
+        mod.selected_extra_attach = item_name
+        mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
+      end)
+    else
       mod.selected_extra_attach = item_name
-      mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
-    end)
+    end
   else
-    mod.selected_extra_attach = item_name
+    mod.selected_extra_attach = ""
+
+    if mod:get("preview_attachments") then
+      mod:refresh_slot(mod.selected_unit_slot == "slot_gear_head" and "slot_body_face" or mod.selected_unit_slot)
+    end
   end
 end
