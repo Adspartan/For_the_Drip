@@ -2,6 +2,10 @@ local nl_1 ="\n    "
 local nl_2 ="\n      "
 return
 {
+  ["0.12.4"] =
+  {
+    "Fix head gear coloring in the menus",
+  },
   ["0.12.3"] =
   {
     "Add update check when opening the UI with a 6min cooldown",

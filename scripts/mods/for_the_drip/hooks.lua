@@ -216,7 +216,9 @@ mod:hook(CLASS.UIProfileSpawner, "_change_slot_item", function (func, self, slot
   local profile = use_loader_version and loading_profile_data.profile or character_spawn_data.profile
   local data = loading_profile_data or character_spawn_data
 
-  if profile.character_id == mod:persistent_table("data").character_id and slot_id ~= "slot_body_face" then
+  if profile.character_id == mod:persistent_table("data").character_id
+     and string.contains_any( slot_id, "slot_gear_head", "slot_gear_upperbody", "slot_gear_lowerbody", "slot_gear_extra_cosmetic"
+                            , "slot_primary", "slot_secondary", "slot_body_hair_color") then
     local custom_item = mod:make_custom_item(slot_id, item)
 
     profile.loadout[slot_id] = custom_item

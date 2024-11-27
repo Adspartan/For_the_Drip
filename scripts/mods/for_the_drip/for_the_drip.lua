@@ -31,8 +31,6 @@ mod.reset_visual_loadout = function()
   mod:reset_all_gear_slots()
 
   mod:hook_enable(CLASS.PlayerUnitVisualLoadoutExtension, "_equip_item_to_slot")
-
-  mod:save_current_loadout()
 end
 
 

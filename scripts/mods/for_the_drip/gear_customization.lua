@@ -80,8 +80,6 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   if slot_name == "slot_body_face" or slot_name == "slot_body_hair_color" then
     local mats = table.clone(source_item.material_overrides or {})
 
-    mod:dump_table_to_file(source_item, 6, slot_name)
-
     if body_data and body_data.use_custom_hair_color and body_data.custom_hair_color ~= "" then
       local mat_name = "hair_color_custom"
 
