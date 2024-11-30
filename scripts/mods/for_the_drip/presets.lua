@@ -74,7 +74,11 @@ mod.load_presets_v2 = function(self)
 end
 
 mod.save_presets_infos = function(self)
-  mod.save_table_to_file(mod.presets_info, "presets_info")
+  -- to avoid saving with default values
+  -- todo: investigate how it could happen in the first place
+  if mod.presets_info.max_preset_id > 0 then
+    mod.save_table_to_file(mod.presets_info, "presets_info")
+  end
 end
 
 mod.save_presets_v2 = function(self)
