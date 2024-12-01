@@ -10,7 +10,6 @@ local reset_ingui_pos = false
 
 local materials_header_open = true
 local slot_selection_header = true
-local options_header = true
 local body_options_header = true
 local presets_header = true
 local unit_header = true
@@ -34,60 +33,6 @@ mod.reset_window_pos = function()
   reset_ingui_pos = true
 end
 
--- todo: checkbox or toggle in the settings
-mod:hook("UIManager", "using_input", function(func, ...)
-  return show_editor or func(...)
-end)
-
-local ImguiDripEditor = class("ImguiDripEditor")
-local editor = ImguiDripEditor:new()
-
-ImguiDripEditor.open = function(self)
-  if not Managers.input:cursor_active() then
-    Managers.input:push_cursor(self.__class_name)
-  end
-
-  show_editor = true
-  Imgui.open_imgui()
-end
-
-ImguiDripEditor.update = function(self)
-  if reset_ingui_pos then
-    -- close headers
-    materials_header_open = false
-    slot_selection_header = false
-    options_header = false
-    body_options_header = false
-    presets_header = false
-    unit_header = false
-
-    reset_ingui_pos = false
-    Imgui.set_next_window_pos(25,25)
-
-    mod:reset_changelogs_ui_pos()
-  end
-
-  local title = "Drip Editor"
-
-  if mod.current_version and mod.current_version ~= "" then
-    title = title.." v"..mod.current_version
-  end
-
-  if mod.update_available then
-    title = title.." - Update Available !"
-  end
-
-  local _, closed = Imgui.begin_window(title, "always_auto_resize")
-
-  if closed then
-    self:close()
-    mod:close_changelogs_ui()
-  else
-    self:ui_content()
-  end
-
-  Imgui.end_window()
-end
 
 mod.selected_color_material = "none"
 mod.selected_pattern_material = "none"
@@ -152,6 +97,61 @@ local extra_attach_change = function()
   if mod.extra_attachments_combo then
     mod:preview_attachment(mod.extra_attachments_combo._value)
   end
+end
+
+-- todo: checkbox or toggle in the settings
+mod:hook("UIManager", "using_input", function(func, ...)
+  return show_editor or func(...)
+end)
+
+local ImguiDripEditor = class("ImguiDripEditor")
+local editor = ImguiDripEditor:new()
+
+ImguiDripEditor.open = function(self)
+  if not Managers.input:cursor_active() then
+    Managers.input:push_cursor(self.__class_name)
+  end
+
+  show_editor = true
+  Imgui.open_imgui()
+end
+
+ImguiDripEditor.update = function(self)
+  if reset_ingui_pos then
+    -- close headers
+    materials_header_open = false
+    slot_selection_header = false
+    options_header = false
+    body_options_header = false
+    presets_header = false
+    unit_header = false
+
+    reset_ingui_pos = false
+    Imgui.set_next_window_pos(25,25)
+
+    mod:reset_changelogs_ui_pos()
+  end
+
+  local title = "Drip Editor"
+
+  if mod.current_version and mod.current_version ~= "" then
+    title = title.." v"..mod.current_version
+  end
+
+  if mod.update_available then
+    title = title.." - Update Available !"
+  end
+
+  local _, closed = Imgui.begin_window(title, "always_auto_resize", "menu_bar")
+
+  if closed then
+    self:close()
+    mod:close_changelogs_ui()
+  else
+    self:ui_content()
+  end
+
+  Imgui.end_window()
 end
 
 ImguiDripEditor.body_customization_ui = function(self)
@@ -488,6 +488,18 @@ ImguiDripEditor.slot_customization_ui = function(self)
 end
 
 ImguiDripEditor.ui_content = function(self)
+  if Imgui.begin_menu_bar() then
+    if Imgui.begin_menu("Settings") then
+      reset_selected_slots = Imgui.checkbox("Reset selected slots before applying changes     ", reset_selected_slots)
+      mod:set("apply_mat_on_index_change", Imgui.checkbox(mod:localize("apply_mat_on_index_change"), mod:get("apply_mat_on_index_change")))
+      mod:set("apply_masks_on_change", Imgui.checkbox("Apply masks on change", mod:get("apply_masks_on_change")))
+      mod:set("preview_attachments", Imgui.checkbox(mod:localize("preview_attachments"), mod:get("preview_attachments")))
+      Imgui.end_menu()
+    end
+    Imgui.end_menu_bar()
+  end
+
+
   local x = Imgui.get_window_size()
   slot_selection_header = Imgui.collapsing_header("Slots", slot_selection_header)
 
@@ -602,29 +614,6 @@ ImguiDripEditor.ui_content = function(self)
 
     Imgui.separator()
   end
-
-  options_header = Imgui.collapsing_header("Options", options_header)
-
-  if options_header then
-    Imgui.spacing()
-    Imgui.same_line()
-    reset_selected_slots = Imgui.checkbox("Reset selected slots before applying changes     ", reset_selected_slots)
-
-    Imgui.spacing()
-    Imgui.same_line()
-    mod:set("apply_mat_on_index_change", Imgui.checkbox(mod:localize("apply_mat_on_index_change"), mod:get("apply_mat_on_index_change")))
-
-    Imgui.spacing()
-    Imgui.same_line()
-    mod:set("apply_masks_on_change", Imgui.checkbox("Apply masks on change", mod:get("apply_masks_on_change")))
-
-    Imgui.spacing()
-    Imgui.same_line()
-    mod:set("preview_attachments", Imgui.checkbox(mod:localize("preview_attachments"), mod:get("preview_attachments")))
-
-    Imgui.separator()
-  end
-
 
   Imgui.spacing()
   Imgui.same_line()

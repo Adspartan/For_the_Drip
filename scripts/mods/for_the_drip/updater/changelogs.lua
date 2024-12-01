@@ -2,6 +2,10 @@ local nl_1 ="\n    "
 local nl_2 ="\n      "
 return
 {
+  ["0.12.5"] =
+  {
+    "Move options to the settings menu",
+  },
   ["0.12.4"] =
   {
     "Fix head gear coloring in the menus",
