@@ -132,6 +132,8 @@ ImguiDripEditor.update = function(self)
     Imgui.set_next_window_pos(25,25)
 
     mod:reset_changelogs_ui_pos()
+  else
+    mod:move_next_window("main_window")
   end
 
   local title = "Drip Editor"
@@ -490,10 +492,15 @@ ImguiDripEditor.slot_customization_ui = function(self)
 end
 
 ImguiDripEditor.ui_content = function(self)
+
   if not mod.font_scale then
     mod.font_scale = mod:get("mod.font_scale") or 1.0
     mod:set("mod.font_scale", mod.font_scale)
   end
+
+  Imgui.set_window_font_scale(mod.font_scale)
+
+  mod:check_current_window_dimensions("main_window")
 
   if Imgui.begin_menu_bar() then
     if Imgui.begin_menu("Settings") then
@@ -522,9 +529,6 @@ ImguiDripEditor.ui_content = function(self)
 
     Imgui.end_menu_bar()
   end
-
-
-  Imgui.set_window_font_scale(mod.font_scale)
 
   local x = Imgui.get_window_size()
   slot_selection_header = Imgui.collapsing_header("Slots", slot_selection_header)

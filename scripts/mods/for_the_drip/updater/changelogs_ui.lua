@@ -87,6 +87,8 @@ mod.update_changelogs_ui = function(self)
   if changelogs_window and changelogs_window._show then
     if reset_pos then
       Imgui.set_next_window_pos(200,25)
+    else
+      mod:move_next_window("changelog_window")
     end
 
     if first_display then
@@ -98,6 +100,8 @@ mod.update_changelogs_ui = function(self)
 
     local _, closed = Imgui.begin_window("For the Drip Changelogs")
     Imgui.set_window_font_scale(mod.font_scale)
+
+    mod.check_current_window_dimensions("changelog_window")
 
     if closed then
       changelogs_window._show = false

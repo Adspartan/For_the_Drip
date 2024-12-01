@@ -6,6 +6,7 @@ return
   {
     "Move options to the settings menu",
     "Add font scale option to the settings menu",
+    "Add checks to prevent the mod's windows from going out of the game's window"
   },
   ["0.12.4"] =
   {

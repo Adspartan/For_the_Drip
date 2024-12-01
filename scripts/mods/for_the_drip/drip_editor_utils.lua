@@ -1,5 +1,58 @@
 local mod = get_mod("for_the_drip")
 
+mod.window_position = {}
+
+mod.check_current_window_dimensions = function(window_id)
+  if not window_id then
+    return
+  end
+
+  local x,y = Imgui.get_window_pos()
+  local w,h = Imgui.get_window_size()
+
+  local screen_w = RESOLUTION_LOOKUP.width
+  local screen_h = RESOLUTION_LOOKUP.height
+
+  local shift_x = 0
+  local shift_y = 0
+  local need_relocate = false
+
+  if (x+w) > (screen_w - 5)  then
+    shift_x = screen_w - (x+w) - 5
+    need_relocate = true
+  elseif x < 10 then
+    shift_x = 10
+    need_relocate = true
+  end
+
+  if (y+h) > (screen_h - 5) then
+    shift_y = screen_h - (y+h) - 5
+    need_relocate = true
+  elseif y < 10 then
+    shift_y = 10
+    need_relocate = true
+  end
+
+  --
+  if w > (screen_w - 20) or h > (screen_h - 20) then
+    mod:reset_window_pos()
+  end
+
+  mod.window_position[window_id] =
+  {
+    ["px"] = (x + shift_x),
+    ["py"] = (y  + shift_y),
+    ["need_relocate"] = need_relocate,
+  }
+end
+
+mod.move_next_window = function(window_id)
+  if window_id and mod.window_position[window_id] and mod.window_position[window_id].need_relocate then
+    Imgui.set_next_window_pos(mod.window_position[window_id].px, mod.window_position[window_id].py)
+    mod.window_position[window_id].need_relocate = false
+  end
+end
+
 mod.on_mask_changed = function()
   if mod:get("apply_masks_on_change") then
     mod:save_current_loadout()
