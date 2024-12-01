@@ -5,6 +5,7 @@ return
   ["0.12.5"] =
   {
     "Move options to the settings menu",
+    "Add font scale option to the settings menu",
   },
   ["0.12.4"] =
   {

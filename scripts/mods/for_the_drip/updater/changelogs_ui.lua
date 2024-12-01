@@ -90,13 +90,14 @@ mod.update_changelogs_ui = function(self)
     end
 
     if first_display then
-      Imgui.set_next_window_size(500,700)
+      Imgui.set_next_window_size(500 * mod.font_scale, 700)
       Imgui.set_next_window_pos(400,100)
 
       first_display = false
     end
 
     local _, closed = Imgui.begin_window("For the Drip Changelogs")
+    Imgui.set_window_font_scale(mod.font_scale)
 
     if closed then
       changelogs_window._show = false

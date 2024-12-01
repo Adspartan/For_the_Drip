@@ -14,6 +14,8 @@ local body_options_header = true
 local presets_header = true
 local unit_header = true
 
+mod.font_scale = nil
+
 mod.reset_editor_nav_combos = function(self)
   mod.color_material_combo = nil
   mod.pattern_material_combo = nil
@@ -243,7 +245,7 @@ ImguiDripEditor.body_customization_ui = function(self)
   Imgui.spacing()
   Imgui.same_line()
 
-  if Imgui.button("Apply##body_option_btn", x-35) then
+  if Imgui.button("Apply##body_option_btn", x-35, 30 * mod.font_scale) then
     mod:save_current_loadout()
     mod:refresh_all_gear_slots()
   end
@@ -478,7 +480,7 @@ ImguiDripEditor.slot_customization_ui = function(self)
         Imgui.spacing()
         Imgui.same_line()
 
-        if Imgui.button("Apply changes", x -35, 30) then
+        if Imgui.button("Apply changes", x -35, 30 * mod.font_scale) then
           mod:save_current_loadout()
           mod:refresh_all_gear_slots()
         end
@@ -488,17 +490,41 @@ ImguiDripEditor.slot_customization_ui = function(self)
 end
 
 ImguiDripEditor.ui_content = function(self)
+  if not mod.font_scale then
+    mod.font_scale = mod:get("mod.font_scale") or 1.0
+    mod:set("mod.font_scale", mod.font_scale)
+  end
+
   if Imgui.begin_menu_bar() then
     if Imgui.begin_menu("Settings") then
       reset_selected_slots = Imgui.checkbox("Reset selected slots before applying changes     ", reset_selected_slots)
       mod:set("apply_mat_on_index_change", Imgui.checkbox(mod:localize("apply_mat_on_index_change"), mod:get("apply_mat_on_index_change")))
       mod:set("apply_masks_on_change", Imgui.checkbox("Apply masks on change", mod:get("apply_masks_on_change")))
       mod:set("preview_attachments", Imgui.checkbox(mod:localize("preview_attachments"), mod:get("preview_attachments")))
+
+      local new_fs = Imgui.slider_float("Font scale", mod.font_scale, 0.5, 3)
+
+      if new_fs ~= mod.font_scale then
+        mod.font_scale = new_fs
+        mod:set("mod.font_scale", mod.font_scale)
+      end
+
+
       Imgui.end_menu()
     end
+
+    if Imgui.begin_menu("Changelogs") then
+      if Imgui.button("Show/Hide") then
+        mod:toggle_changelogs_ui()
+      end
+      Imgui.end_menu()
+    end
+
     Imgui.end_menu_bar()
   end
 
+
+  Imgui.set_window_font_scale(mod.font_scale)
 
   local x = Imgui.get_window_size()
   slot_selection_header = Imgui.collapsing_header("Slots", slot_selection_header)
@@ -580,7 +606,7 @@ ImguiDripEditor.ui_content = function(self)
     Imgui.spacing()
     Imgui.same_line()
 
-    if Imgui.button("Load Preset", x-35, 30) then
+    if Imgui.button("Load Preset", x-35, 30 * mod.font_scale) then
       if mod.selected_preset ~= "none" then
         mod.load_preset(mod.selected_preset)
       end
@@ -600,14 +626,14 @@ ImguiDripEditor.ui_content = function(self)
       Imgui.spacing()
       Imgui.same_line()
 
-      if Imgui.button("Override Preset", x-35, 30) then
+      if Imgui.button("Override Preset", x-35, 30 * mod.font_scale) then
         mod:override_selected_preset()
       end
 
       Imgui.spacing()
       Imgui.same_line()
 
-      if Imgui.button("Delete Preset", x-35, 30) then
+      if Imgui.button("Delete Preset", x-35, 30 * mod.font_scale) then
         mod:deleted_selected_preset()
       end
     end
@@ -618,13 +644,13 @@ ImguiDripEditor.ui_content = function(self)
   Imgui.spacing()
   Imgui.same_line()
 
-  if Imgui.button("Apply", x / 2 - 20, 30) then
+  if Imgui.button("Apply", x / 2 - 20, 30 * mod.font_scale) then
     apply_changes()
   end
 
   Imgui.same_line()
 
-  if Imgui.button("Save Preset", x / 2 - 20, 30) then
+  if Imgui.button("Save Preset", x / 2 - 20, 30 * mod.font_scale) then
     mod:save_current_look()
   end
 
@@ -633,7 +659,7 @@ ImguiDripEditor.ui_content = function(self)
   Imgui.spacing()
   Imgui.same_line()
 
-  if Imgui.button("Reset selected slots",  x / 2 - 20, 30) then
+  if Imgui.button("Reset selected slots",  x / 2 - 20, 30 * mod.font_scale) then
     for slot, checked in pairs(mod.slots_selection_status) do
       if checked then
         mod:reset_slot(slot)
@@ -647,7 +673,7 @@ ImguiDripEditor.ui_content = function(self)
 
   Imgui.same_line()
 
-  if Imgui.button("Reset all slots",  x / 2 - 20, 30) then
+  if Imgui.button("Reset all slots",  x / 2 - 20, 30 * mod.font_scale) then
     mod:reset_visual_loadout()
   end
 
@@ -655,10 +681,6 @@ ImguiDripEditor.ui_content = function(self)
 
   Imgui.spacing()
   Imgui.same_line()
-
-  if Imgui.button("Changelogs",  x - 35, 30) then
-    mod:toggle_changelogs_ui()
-  end
 end
 
 
