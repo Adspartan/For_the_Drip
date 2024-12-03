@@ -491,6 +491,8 @@ ImguiDripEditor.slot_customization_ui = function(self)
   end
 end
 
+mod.output_directory_input_value = nil
+
 ImguiDripEditor.ui_content = function(self)
 
   if not mod.font_scale then
@@ -509,13 +511,42 @@ ImguiDripEditor.ui_content = function(self)
       mod:set("apply_masks_on_change", Imgui.checkbox("Apply masks on change", mod:get("apply_masks_on_change")))
       mod:set("preview_attachments", Imgui.checkbox(mod:localize("preview_attachments"), mod:get("preview_attachments")))
 
+      Imgui.separator()
       local new_fs = Imgui.slider_float("Font scale", mod.font_scale, 0.5, 3)
 
       if new_fs ~= mod.font_scale then
         mod.font_scale = new_fs
         mod:set("mod.font_scale", mod.font_scale)
       end
+      Imgui.separator()
 
+
+      if not mod.output_directory_input_value then
+        mod.output_directory_input_value = mod:persistent_table("data").directory
+      end
+
+      mod.output_directory_input_value = Imgui.input_text("Preset Directory", mod.output_directory_input_value)
+
+      if Imgui.button("Update Directory") then
+        if mod.output_directory_input_value == "" then
+          mod:set("output_folder", nil)
+          mod:setup_output_folder()
+
+          mod.output_directory_input_value = mod:persistent_table("data").directory
+        end
+
+        local last_char = string.sub(mod.output_directory_input_value, -1)
+
+        if last_char ~= "\\" and last_char ~= "/" then
+          mod.output_directory_input_value = mod.output_directory_input_value.."\\"
+        end
+
+        mod:set("output_folder", mod.output_directory_input_value)
+        mod:persistent_table("data").directory = mod.output_directory_input_value
+
+        mod:create_output_directory()
+        mod:save_presets_v2()
+      end
 
       Imgui.end_menu()
     end
@@ -580,6 +611,7 @@ ImguiDripEditor.ui_content = function(self)
 
   self:slot_customization_ui()
 
+  x = Imgui.get_window_size()
   presets_header = Imgui.collapsing_header("Presets##header", presets_header)
 
   if presets_header then

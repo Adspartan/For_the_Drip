@@ -14,12 +14,19 @@ if not _os.initialized then
 end
 
 mod.setup_output_folder = function()
-  local directory = _os.getenv('APPDATA').."/Fatshark/Darktide/for_the_drip/"
-  mod:persistent_table("data").directory = directory
-  _os.execute("mkdir " .. "\"" .. directory .. "\" 2>nul")
-  -- remove readonly attribute
-  _os.execute("attrib /d -r " .. "\"" .. directory .. "\" /s 2>nul")
-  _os.execute("attrib -r " .. "\"" .. directory .. "*.*\" /s 2>nul")
+  local settings_folder = mod:get("output_folder")
+
+  if settings_folder and settings_folder ~= "" then
+    mod:persistent_table("data").directory = settings_folder
+  else
+    mod:persistent_table("data").directory = _os.getenv('APPDATA').."/Fatshark/Darktide/for_the_drip/"
+  end
+
+  mod:create_output_directory()
+end
+
+mod.create_output_directory = function()
+  _os.execute("mkdir " .. "\"" .. mod:persistent_table("data").directory .. "\" 2>nul")
 end
 
 mod.append_to_file = function(line, filename)

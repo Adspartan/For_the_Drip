@@ -2,6 +2,10 @@ local nl_1 ="\n    "
 local nl_2 ="\n      "
 return
 {
+  ["0.12.6"] =
+  {
+    "Add the option to change the preset folder location",
+  },
   ["0.12.5"] =
   {
     "Move options to the settings menu",
