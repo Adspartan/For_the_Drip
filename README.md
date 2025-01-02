@@ -1,29 +1,44 @@
-# Why isn't the mod on nexus ?
+# Why isn't the mod on Nexus ?
 Because there's still some issues with it, they are getting sorted out but I don't want to upload an unstable mod there.
 
-As of v0.12.0 the mod has an update checker and updater, so you'll be warned when there is a new update available and can update by typing `/ftd_update` in game.
+As of v0.12.0 the mod has an update checker and updater, so you'll be warned when there is a new update available and can update by typing `/ftd_update` in the game chatbox.
 
 
 # Support
-For support go to the [Modding Discord](https://discord.gg/rKYWtaDx4D) -> [For the Drip Post](https://discord.com/channels/1048312349867646996/1048318548180738118/1163114688540848169)
+For support go to the [Darktide Modders Discord](https://discord.gg/rKYWtaDx4D) -> [For the Drip Post](https://discord.com/channels/1048312349867646996/1048318548180738118/1163114688540848169)
 
 
 
 # How to use
 
+## Installation
+1. Go to the [latest release](https://github.com/Adspartan/For_the_Drip/releases/latest) on this repository
+2. Download the `for_the_drip.zip` archive
+3. Choose an installation method based on which mod manager you're using
+    - Manual, no mod manager:
+         1. Unzip the archive and add the `for_the_drip` folder to your Darktide mods folder
+         2. Type `for_the_drip` into your `mod_load_order.txt` (place it below the [Extended Weapon Customization](https://www.nexusmods.com/warhammer40kdarktide/mods/277/) mod if you have it)
+         3. Save the `mod_load_order.txt` file
+    - Vortex: Choose one of the following ways to install mods manually through Vortex
+        - Click `Install From File` on the top bar of the Mods section, then select the archive
+        - Drag the archive into the `DROP FILES HERE` bar in the Mods section
+        - Drag the archive into the Vortex downloads folder
+4. Set up the keybinds in the Mod Options menu
 ## Basic Customization
-- Add the mod to your mod folder and into you mod_load_order.txt (below the weapon customization mod if you have it)
-- Setup the keybinds in the mod options
-- **Make sure your game isn't set to fullscreen or you won't be able to use the UI**
-- Go the the Mourningstar or Psykhanium
-- Make sure to be in 3rd person mode to change your gear's look for a better experience
-- Select which slots you want the apply changes for better control (primary -> melee weapon, secondary -> ranged weapon)
-- Change materials and apply (if the option to apply automatically isn't selected)
-  - Colors to change the coloring of the items (color_x indicate the number of colors for this specific material)
-  - Materials to change what kind of material the parts of the item will look like (ex: cloth/leather)
-    - Wear: change how much wear/visible sign of use an item has
-    - Cloth: to change non metallic parts
-    - Metal: to change metallic parts
+1. Go to the Mourningstar or Psykhanium
+    - When changing your gear's appearances, staying in 3rd person makes it easier to see changes compared to 1st person
+    - The [Camera FreeFlight](https://www.nexusmods.com/warhammer40kdarktide/mods/32) mod gives more viewing angles, but using it while the Drip Editor is open is difficult because moving the mouse affects both the cursor position and the camera angle
+2. Select which slots you want to apply changes to (box has a checkmark -> changes will apply)
+    - This is the 1st section at the top of the Drip Editor
+    - slot_primary -> melee weapon, slot_secondary -> ranged weapon)
+3. Change material types and click `Apply` at the bottom (if you haven't enabled the option to apply materials automatically)
+  - Colors: the coloring of the items 
+    - `color_x` indicates the number of colors for this specific material (ex: color_3_colour_desert_01 has 3 colors)
+    - Some materials do not contain this indicator, but may still contain multiple colors (ex: color_cadia_02)
+  - Material: what kind of material the parts of the item will look like (ex: cloth/leather)
+    - Wear: changes how much wear (visible signs of use) an item has
+    - Fabric: changes non-metallic parts
+    - Metal: changes metallic parts
   - Patterns to change how the different colors are displayed
     
  
