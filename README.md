@@ -53,12 +53,12 @@ Some details/parts on the cosmetics may not be affected at all by material chang
 ## Advanced Customization
 
 Select a slot in the 'Slot Customization' section (4th from the top of the Drip Editor) to customize it further
-- Hide Attachments by unselecting them
+- Hide Attachments by unselecting them in the checkboxes on the left
 - Select which attachments get customized (material changes) by checking/unchecking 'Customize'
 - Add new attachments to the item by selecting one in the 'Extra Attachment' drop down and pressing 'Add attachment'
 - Extra attachments can be removed by clicking on the 'x' button on the right
 - 'Hide x' checkboxes are used to hide/show body parts
-- Masks are used to partially hide body parts to avoid clipping with the cosmetics (only work if the body part is not hidden already)
+- Masks are used to partially hide body parts to avoid clipping with the cosmetics (only works if the body part is not hidden already)
 
 
 ## Presets
@@ -69,6 +69,6 @@ Select a slot in the 'Slot Customization' section (4th from the top of the Drip 
 
 
 # Currently Known Issues
-- **If the UI goes out of the game window it'll bug out/move on its own, use the keybind to reset the UI. It must be set in the Mod Options menu first** (quirk of the ImGui implementation in the game)
+- **If the UI goes out of the game window it'll bug out/move on its own, use the keybind to reset the UI. It must be set in the Mod Options menu first.** This issue is a quirk of the game's ImGui implementation.
 - Voice filters not being applied
   
