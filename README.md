@@ -1,5 +1,5 @@
-# Why isn't the mod on Nexus ?
-Because there's still some issues with it, they are getting sorted out but I don't want to upload an unstable mod there.
+# Why isn't the mod on Nexus?
+Because there's still some issues with it; they are getting sorted out, but I don't want to upload an unstable mod there.
 
 As of v0.12.0 the mod has an update checker and updater, so you'll be warned when there is a new update available and can update by typing `/ftd_update` in the game chatbox.
 
@@ -29,29 +29,30 @@ For support go to the [Darktide Modders Discord](https://discord.gg/rKYWtaDx4D) 
     - When changing your gear's appearances, staying in 3rd person makes it easier to see changes compared to 1st person
     - The [Camera FreeFlight](https://www.nexusmods.com/warhammer40kdarktide/mods/32) mod gives more viewing angles, but using it while the Drip Editor is open is difficult because moving the mouse affects both the cursor position and the camera angle
 2. Select which slots you want to apply changes to (box has a checkmark -> changes will apply)
-    - This is the 1st section at the top of the Drip Editor
+    - This is the 'Slots' section: 1st section from the top of the Drip Editor
     - slot_primary -> melee weapon, slot_secondary -> ranged weapon)
-3. Change material types and click `Apply` at the bottom (if you haven't enabled the option to apply materials automatically)
-  - Colors: the coloring of the items 
-    - `color_x` indicates the number of colors for this specific material (ex: color_3_colour_desert_01 has 3 colors)
-    - Some materials do not contain this indicator, but may still contain multiple colors (ex: color_cadia_02)
-  - Material: what kind of material the parts of the item will look like (ex: cloth/leather)
-    - Wear: changes how much wear (visible signs of use) an item has
-    - Fabric: changes non-metallic parts
-    - Metal: changes metallic parts
-  - Patterns to change how the different colors are displayed
-    
+3. Change material types and click 'Apply' at the bottom (if you haven't enabled the option to apply materials automatically)
+      - Colors: the coloring of the items 
+        - 'color_x' indicates the number of colors for this specific material (ex: `color_3_colour_desert_01` has 3 colors)
+        - Some materials do not contain this indicator, but may still contain multiple colors (ex: `color_cadia_02`)
+      - Material: what kind of material the parts of the item will look like (ex: cloth/leather)
+        - Wear: changes how much wear (visible signs of use) an item has
+        - Fabric: changes non-metallic parts
+        - Metal: changes metallic parts
+      - Patterns: how colors are displayed
+        - Patterns ending in '_inv' differ in which parts they apply to (ex: applying a Pattern to clothes but not the armor)
+        - Works when the selected Color has multiple colors
  
 :warning: **Not all materials will affect the same parts of an item**
 
-Colors and Patterns will only affect Cloth parts if the material used allows it
+Colors and Patterns will only affect Cloth parts if the material used allows it (ex: `fabric_leather_03_wear_01` is black leather no matter what Color/Pattern you have chosen)
 
-Some details/parts on the cosmetics may not be affected at all by material changes !
+Some details/parts on the cosmetics may not be affected at all by material changes!
   
 
 ## Advanced Customization
 
-Select a slot in the 'Slot Customization' section to customize it further
+Select a slot in the 'Slot Customization' section (4th from the top of the Drip Editor) to customize it further
 - Hide Attachments by unselecting them
 - Select which attachments get customized (material changes) by checking/unchecking 'Customize'
 - Add new attachments to the item by selecting one in the 'Extra Attachment' drop down and pressing 'Add attachment'
