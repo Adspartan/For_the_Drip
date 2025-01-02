@@ -62,13 +62,13 @@ Select a slot in the 'Slot Customization' section (4th from the top of the Drip 
 
 
 ## Presets
-- You can save your current customizations to new preset or override an existing one.
-- Presets aren't tied to loadout currently, it'll most likely come as an option in the future
+- You can save your current customizations to new preset or override an existing one
+- Presets aren't tied to loadout currently; it'll most likely come as an option in the future
 - One preset can have customization data for multiple items of the same slot
 
 
 
 # Currently Known Issues
-- **If the UI goes out of the game window it'll bug out/move on its own, there is a keybind to reset the UI when that happens** (quirk of the ImGui implementation in the game)
+- **If the UI goes out of the game window it'll bug out/move on its own, use the keybind to reset the UI. It must be set in the Mod Options menu first** (quirk of the ImGui implementation in the game)
 - Voice filters not being applied
   
