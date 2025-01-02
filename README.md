@@ -33,8 +33,8 @@ For support go to the [Darktide Modders Discord](https://discord.gg/rKYWtaDx4D) 
     - slot_primary -> melee weapon, slot_secondary -> ranged weapon)
 3. Change material types and click 'Apply' at the bottom (if you haven't enabled the option to apply materials automatically)
       - Colors: the coloring of the items 
-        - 'color_x' indicates the number of colors for this specific material (ex: `color_3_colour_desert_01` has 3 colors)
-        - Some materials do not contain this indicator, but may still contain multiple colors (ex: `color_cadia_02`)
+        - 'color_x' at the start of the name indicates the number of colors for this specific material (ex: `color_3_colour_desert_01` has 3 colors)
+        - Some materials do not contain this indicator, but may still contain multiple colors (ex: `color_cadia_02` has 3 colors)
       - Material: what kind of material the parts of the item will look like (ex: cloth/leather)
         - Wear: changes how much wear (visible signs of use) an item has
         - Fabric: changes non-metallic parts
