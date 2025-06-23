@@ -690,7 +690,7 @@ mod.make_extra_attach_data = function(self, attach_item_name, item)
     ["is_visible"] = true,
     ["is_extra"] = true,
     ["customize"] = true,
-    ["name"] = "attachment_"..(mod:get_highest_attachment_id(item)+1),
+    ["name"] = "attachment_"..(mod:get_highest_attachment_id(item)+1).."_"..mod:shorten_item_name(attach_item_name),
     ["material_overrides"] = {},
   }
 end

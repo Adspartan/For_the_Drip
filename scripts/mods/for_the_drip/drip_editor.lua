@@ -590,7 +590,7 @@ ImguiDripEditor.ui_content = function(self)
     Imgui.same_line()
 
     -- all 3 are reset at the same time
-    if not mod.color_material_combo then
+    if (not mod.color_material_combo) or (not mod.gear_material_combo) or (not mod.pattern_material_combo) then
       mod.color_material_combo =   mod:create_nav_combo("Colors   ", mod.color_materials, mod.selected_color_material, apply_changes_on_change, "none")
       mod.gear_material_combo =    mod:create_nav_combo("Materials", mod.gear_materials, mod.selected_gear_material, apply_changes_on_change, "none")
       mod.pattern_material_combo = mod:create_nav_combo("Patterns ", mod.pattern_materials, mod.selected_pattern_material, apply_changes_on_change, "none")
