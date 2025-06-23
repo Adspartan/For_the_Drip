@@ -50,14 +50,6 @@ mod:hook(CLASS.PlayerUnitVisualLoadoutExtension, "server_correction_occurred", f
           self:_unwield_slot(self._locally_wielded_slot)
         end
 
-        local fx_sources = self_fx_sources[slot_name]
-
-        if fx_sources then
-          for _, source_name in pairs(fx_sources) do
-            fx_extension:stop_looping_wwise_events_for_source_on_mispredict(source_name)
-          end
-        end
-
         self:_unequip_item_from_slot(slot_name, from_server_correction_occurred, from_frame, false)
       elseif is_locally_wielded_slot then
         rewield = true
@@ -208,7 +200,7 @@ mod:hook_safe(CLASS.UIWeaponSpawner, "_spawn_weapon", function(self, item, link_
 end)
 
 
-mod:hook(CLASS.UIProfileSpawner, "_change_slot_item", function (func, self, slot_id, item)
+mod:hook(CLASS.UIProfileSpawner, "_change_slot_item", function (func, self, slot_id, item, loadout, visual_loadout)
   local character_spawn_data = self._character_spawn_data
   local loading_profile_data = self._loading_profile_data
   local use_loader_version = loading_profile_data ~= nil
@@ -219,13 +211,14 @@ mod:hook(CLASS.UIProfileSpawner, "_change_slot_item", function (func, self, slot
   if profile.character_id == mod:persistent_table("data").character_id
      and string.contains_any( slot_id, "slot_gear_head", "slot_gear_upperbody", "slot_gear_lowerbody", "slot_gear_extra_cosmetic"
                             , "slot_primary", "slot_secondary", "slot_body_hair_color") then
+
     local custom_item = mod:make_custom_item(slot_id, item)
 
     profile.loadout[slot_id] = custom_item
 
-    func(self, slot_id, custom_item)
+    func(self, slot_id, custom_item, loadout, visual_loadout)
   else
-    func(self, slot_id, item)
+    func(self, slot_id, item, loadout, visual_loadout)
   end
 end)
 

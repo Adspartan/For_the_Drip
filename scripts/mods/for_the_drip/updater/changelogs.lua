@@ -2,6 +2,10 @@ local nl_1 ="\n    "
 local nl_2 ="\n      "
 return
 {
+  ["0.12.8"] =
+  {
+    "Fix some crashes with the Arbites update",
+  },
   ["0.12.7"] =
   {
     "Change the way attachments names are generated internally to avoid conflicts",
