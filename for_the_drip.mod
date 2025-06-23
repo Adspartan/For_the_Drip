@@ -8,5 +8,11 @@ return {
 			mod_localization = "for_the_drip/scripts/mods/for_the_drip/for_the_drip_localization",
 		})
 	end,
+	load_after = {
+		"weapon_customization",
+	},
+	load_before = {
+		"for_the_drip_extra",
+	},
 	packages = {},
 }
