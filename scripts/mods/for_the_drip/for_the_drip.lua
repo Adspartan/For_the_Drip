@@ -153,15 +153,15 @@ mod.apply_mat_to_slot = function(slot_name, material_name)
 
       if slot_name == "slot_primary" or slot_name == "slot_secondary" then
         for name,slot in pairs(visual_loadout_extension._equipment) do
-          if slot.dummy and slot.name == slot_name then
+          if slot.name == slot_name and slot.dummy then
+            dummy_unit = slot.dummy
+
             if slot.dummy1 then
               dummy_unit_1 = slot.dummy1
             end
+
             if slot.dummy2 then
-              dummy_unit_2 = slot.dummy1
-            end
-            if slot.dummy then
-              dummy_unit = slot.dummy1
+              dummy_unit_2 = slot.dummy2
             end
           end
         end
@@ -218,8 +218,21 @@ mod.apply_customization_to_back_weapons = function(self, unit, slot_name)
       local slot = visible_equipment_extension.equipment[slot_name]
 
       if slot and visible_equipment_extension.dummy_units[slot] then
-        local item_unit = visible_equipment_extension.dummy_units[slot].base
-        mod.apply_custom_material_override(item_unit, mod.current_slots_data[slot_name])
+        local dummies = visible_equipment_extension.dummy_units[slot]
+
+        
+        if dummies.base then
+          mod.apply_custom_material_override(dummies.base, mod.current_slots_data[slot_name])
+        end
+
+        
+        if dummies.dummy1 then
+          mod.apply_custom_material_override(dummies.dummy1, mod.current_slots_data[slot_name])
+        end
+
+        if dummies.dummy2 then
+          mod.apply_custom_material_override(dummies.dummy2, mod.current_slots_data[slot_name])
+        end
 
         return true
       end
@@ -232,13 +245,18 @@ end
 mod.prepare_body_slot_item = function(self, loadout, slot_name)
   local item = table.clone_instance(loadout[slot_name])
 
-  local attachments = {}
+  local attachments = item.attachments or {}
 
   -- todo: handle children too (used for the face hair colour for ex)
   for k, slot_dep_name in pairs(PlayerCharacterConstants.slot_configuration[slot_name].slot_dependencies) do
-    local attachment = table.clone_instance(loadout[slot_dep_name])
+    if not attachments[slot_dep_name] then
+      local dependency_item = loadout[slot_dep_name]
+      if dependency_item then
+        local attachment = table.clone_instance(dependency_item)
 
-    attachments[slot_dep_name] = { item = attachment }
+        attachments[slot_dep_name] = { item = attachment }
+      end
+    end
   end
 
   rawset(item, "attachments", attachments)
@@ -588,4 +606,3 @@ mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/gear_customization")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/presets")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/updater/updater")
 mod:io_dofile("for_the_drip/scripts/mods/for_the_drip/updater/changelogs_ui")
-

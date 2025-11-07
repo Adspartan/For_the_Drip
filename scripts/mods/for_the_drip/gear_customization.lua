@@ -74,8 +74,16 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
 
   if slot_name == "slot_body_eye_color" then
-    rawset(source_item, "material_overrides", {"color_1_colour_red_02"})
-  end
+    local token = source_item.material_overrides
+        and source_item.material_overrides[1]
+        or "eyes_blue_01"      
+
+    rawset(source_item, "material_overrides", { token })
+
+    
+    rawset(source_item, "material_override_apply_to_parent", true)
+    rawset(source_item, "parent_slot_names", { "slot_body_face" })
+end
 
   if slot_name == "slot_body_face" or slot_name == "slot_body_hair_color" then
     local mats = table.clone(source_item.material_overrides or {})
@@ -103,7 +111,10 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   end
 
   if slot_name == "slot_body_face" then
-    local gear_head_item = source_item.attachments and source_item.attachments["slot_gear_head"] and source_item.attachments["slot_gear_head"].item or table.clone_instance(MasterItems.get_item("content/items/characters/player/human/gear_head/empty_headgear"))
+        local gear_head_item = source_item.attachments and source_item.attachments["slot_gear_head"] and source_item.attachments["slot_gear_head"].item
+    if gear_head_item then
+      gear_head_item = table.clone_instance(gear_head_item)
+    end
     local custom_head_gear = mod:make_custom_item("slot_gear_head", gear_head_item)
 
     if not source_item.attachments then
@@ -120,24 +131,29 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
     rawset(source_item.attachments["slot_gear_head"], "item" , custom_head_gear)
 
-    rawset(source_item, "hide_eyebrows", custom_head_gear.hide_eyebrows)
-    rawset(source_item, "hide_beard", custom_head_gear.hide_beard)
-    rawset(source_item, "mask_hair", custom_head_gear.mask_hair)
-    rawset(source_item, "mask_facial_hair", custom_head_gear.mask_facial_hair)
-    rawset(source_item, "mask_face", custom_head_gear.mask_face)
-
     local hide_hair = false
+    local hide_beard = false
 
-    if mod.current_slots_data.gear_customization_data then
-      local head_gead_data = mod.current_slots_data.gear_customization_data[custom_head_gear.name]
+    if custom_head_gear then
+      rawset(source_item, "hide_eyebrows", custom_head_gear.hide_eyebrows)
+      rawset(source_item, "hide_beard", custom_head_gear.hide_beard)
+      rawset(source_item, "mask_hair", custom_head_gear.mask_hair)
+      rawset(source_item, "mask_facial_hair", custom_head_gear.mask_facial_hair)
+      rawset(source_item, "mask_face", custom_head_gear.mask_face)
 
-      if head_gead_data then
-        hide_hair = head_gead_data.hide_hair
+      if mod.current_slots_data.gear_customization_data then
+        local head_gead_data = mod.current_slots_data.gear_customization_data[custom_head_gear.name]
+
+        if head_gead_data then
+          hide_hair = head_gead_data.hide_hair
+        else
+          hide_hair = mod:head_gear_hide_hair(custom_head_gear)
+        end
       else
         hide_hair = mod:head_gear_hide_hair(custom_head_gear)
       end
-    else
-      hide_hair = mod:head_gear_hide_hair(custom_head_gear)
+
+      hide_beard = custom_head_gear.hide_beard
     end
 
     if hide_hair then
@@ -158,6 +174,95 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       })
     end
 
+    if hide_beard then
+      rawset(source_item.attachments, "slot_body_face_hair", {
+        children = {},
+        item = ""
+      })
+    else
+      local player = Managers.player:local_player_safe(1)
+      local loadout = player:profile().loadout
+      local face_hair_item = loadout["slot_body_face_hair"]
+
+      if face_hair_item then
+        face_hair_item = mod:add_required_body_attachments(face_hair_item, loadout, "slot_body_face_hair")
+
+        rawset(source_item.attachments, "slot_body_face_hair", {
+          item = mod:make_custom_item("slot_body_face_hair", face_hair_item)
+        })
+      end
+    end
+
+    do
+      local player = Managers.player and Managers.player:local_player_safe(1)
+
+      if player then
+        local loadout = player:profile().loadout or {}
+        local face_tattoo_item = loadout["slot_body_face_tattoo"]
+
+        if face_tattoo_item and face_tattoo_item ~= "" then
+          local cloned_tattoo_item = table.clone_instance(face_tattoo_item)
+
+          if not source_item.attachments then
+            rawset(source_item, "attachments", {})
+          end
+
+          if not source_item.attachments["slot_body_face_tattoo"] then
+            rawset(source_item.attachments, "slot_body_face_tattoo", {
+              item = cloned_tattoo_item,
+            })
+          else
+            source_item.attachments["slot_body_face_tattoo"].item = cloned_tattoo_item
+          end
+        end
+      end
+    end
+
+    do
+      local player = Managers.player and Managers.player:local_player_safe(1)
+
+      if player then
+        local loadout = player:profile().loadout or {}
+        local face_scar_item = loadout["slot_body_face_scar"]
+
+        if face_scar_item and face_scar_item ~= "" then
+          local cloned_scar_item = table.clone_instance(face_scar_item)
+
+          if not source_item.attachments then
+            rawset(source_item, "attachments", {})
+          end
+
+          if not source_item.attachments["slot_body_face_scar"] then
+            rawset(source_item.attachments, "slot_body_face_scar", { item = cloned_scar_item })
+          else
+            source_item.attachments["slot_body_face_scar"].item = cloned_scar_item
+          end
+        end
+      end
+    end
+
+    do
+      local player = Managers.player and Managers.player:local_player_safe(1)
+
+      if player then
+        local loadout = player:profile().loadout or {}
+        local skin_color_item = loadout["slot_body_skin_color"]
+
+        if skin_color_item and skin_color_item ~= "" then
+          
+          local cloned_skin_item = table.clone_instance(skin_color_item)
+
+          if not source_item.attachments then
+            rawset(source_item, "attachments", {})
+          end
+
+          rawset(source_item.attachments, "slot_body_skin_color", {
+            item = cloned_skin_item,
+          })
+        end
+      end
+    end
+
     return source_item
   end
 
@@ -168,7 +273,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
     customization_data = mod.current_slots_data.gear_customization_data[source_item.name]
   end
 
-  if (not customization_data) and (not slot_data) then
+  if (not customization_data) and ((not slot_data) or (next(slot_data) == nil)) then
     if mod.selected_unit_slot == slot_name and mod.selected_extra_attach ~= "" then
       if not source_item.attachments then
         rawset(source_item, "attachments", {})
@@ -274,8 +379,7 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       {
         ["children"] = {},
         ["material_overrides"] = {},
-        ["item"] = table.clone(MasterItems.get_item(mod.selected_extra_attach)),
-        ["is_extra"] = true,
+                  ["item"] = MasterItems.get_item(mod.selected_extra_attach) and table.clone(MasterItems.get_item(mod.selected_extra_attach)) or {},        ["is_extra"] = true,
         ["is_preview"] = true,
       }
     end
@@ -373,8 +477,20 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
       rawset(source_item, "attachments", {})
 
     elseif customization_data then
-      rawset(source_item, "mask_torso", customization_data.mask_torso)
-      rawset(source_item, "mask_arms", customization_data.mask_arms)
+
+      local torso_mask = customization_data.mask_torso
+      local arms_mask  = customization_data.mask_arms
+
+      if customization_data.hide_body == false and (torso_mask == nil or torso_mask == "") then
+        torso_mask = "mask_default"
+      end
+
+      if customization_data.hide_arms == false and (arms_mask == nil or arms_mask == "") then
+        arms_mask = "mask_default"
+      end
+
+      rawset(source_item, "mask_torso", torso_mask)
+      rawset(source_item, "mask_arms",  arms_mask)
 
       local hide_slots = {}
 
@@ -395,7 +511,13 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
 
       skip_attachments = true
     elseif customization_data then
-      rawset(source_item, "mask_legs", customization_data.mask_legs)
+      local legs_mask = customization_data.mask_legs
+
+      if customization_data.hide_legs == false and (legs_mask == nil or legs_mask == "") then
+        legs_mask = "mask_default"
+      end
+
+      rawset(source_item, "mask_legs", legs_mask)
 
       local hide_slots = {}
 

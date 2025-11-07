@@ -224,27 +224,37 @@ FilterNavigationCombo.display = function(self)
   Imgui.same_line()
 
   if Imgui.button("<##previous_"..self._title) then
-    if self._index > 1 then
-      self._index = self._index - 1
+    if #self._current_elements == 0 then
+      self._value = ""
+      self._index = 0
     else
-      self._index = #self._current_elements
-    end
+      if self._index > 1 then
+        self._index = self._index - 1
+      else
+        self._index = #self._current_elements
+      end
 
-    self._value = self._current_elements[self._index]
-    self:on_value_changed()
+      self._value = self._current_elements[self._index]
+      self:on_value_changed()
+    end
   end
 
   Imgui.same_line()
 
   if Imgui.button(">##next_"..self._title) then
-    self._index = self._index + 1
+    if #self._current_elements == 0 then
+      self._value = ""
+      self._index = 0
+    else
+      self._index = self._index + 1
 
-    if self._index > #self._current_elements then
-      self._index = 1
+      if self._index > #self._current_elements then
+        self._index = 1
+      end
+
+      self._value = self._current_elements[self._index]
+      self:on_value_changed()
     end
-
-    self._value = self._current_elements[self._index]
-    self:on_value_changed()
   end
 
   Imgui.same_line()
