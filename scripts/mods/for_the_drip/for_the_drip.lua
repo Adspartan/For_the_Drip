@@ -220,12 +220,12 @@ mod.apply_customization_to_back_weapons = function(self, unit, slot_name)
       if slot and visible_equipment_extension.dummy_units[slot] then
         local dummies = visible_equipment_extension.dummy_units[slot]
 
-        
+
         if dummies.base then
           mod.apply_custom_material_override(dummies.base, mod.current_slots_data[slot_name])
         end
 
-        
+
         if dummies.dummy1 then
           mod.apply_custom_material_override(dummies.dummy1, mod.current_slots_data[slot_name])
         end
@@ -268,7 +268,7 @@ mod.add_required_body_attachments = function(self, item, loadout, slot_name)
   local attachments = item.attachments or {}
 
   for k, slot_dep_name in pairs(PlayerCharacterConstants.slot_configuration[slot_name].slot_dependencies) do
-    local attachment = table.clone_instance(loadout[slot_dep_name])
+    local attachment = table.clone_instance(loadout[slot_dep_name] or {})
 
     if not attachments[slot_dep_name] then
       attachments[slot_dep_name] = { item = attachment }
