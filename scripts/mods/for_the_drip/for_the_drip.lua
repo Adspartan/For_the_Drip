@@ -270,10 +270,10 @@ mod.add_required_body_attachments = function(self, item, loadout, slot_name)
   for k, slot_dep_name in pairs(PlayerCharacterConstants.slot_configuration[slot_name].slot_dependencies) do
     local attachment = table.clone_instance(loadout[slot_dep_name] or {})
 
-    if not attachments[slot_dep_name] then
-      attachments[slot_dep_name] = { item = attachment }
+      if not attachments[slot_dep_name] then
+        attachments[slot_dep_name] = { item = attachment }
+      end
     end
-  end
 
   rawset(item, "attachments", attachments)
 
