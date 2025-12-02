@@ -262,6 +262,60 @@ mod:hook_safe(CLASS.StateMainMenu, "event_request_select_new_profile", function 
   end
 end)
 
+mod:hook(CLASS.UIProfileSpawner, "_change_slot_items", function (func, self, changed_items, loadout, visual_loadout, equipped_items_or_nil)
+  local character_spawn_data = self._character_spawn_data
+  local loading_profile_data = self._loading_profile_data
+  local use_loader_version = loading_profile_data ~= nil
+
+  local was_patched = false
+  if not use_loader_version and not self._single_item_profile_loader then
+    if character_spawn_data and character_spawn_data.profile_loader then
+      self._single_item_profile_loader = character_spawn_data.profile_loader
+      was_patched = true
+    end
+  end
+
+  local profile = use_loader_version and loading_profile_data.profile or character_spawn_data.profile
+
+  if profile and profile.character_id == mod:persistent_table("data").character_id then
+    for slot_id, item in pairs(changed_items) do
+      local custom_item = mod:make_custom_item(slot_id, item)
+
+      changed_items[slot_id] = custom_item
+      visual_loadout[slot_id] = custom_item
+
+      if slot_id == "slot_gear_upperbody" and custom_item then
+        local data = mod.current_slots_data.gear_customization_data[custom_item.name]
+
+        if data then
+          if data.hide_body == false then
+            changed_items["slot_body_torso"] = loadout["slot_body_torso"]
+            visual_loadout["slot_body_torso"] = loadout["slot_body_torso"]
+          end
+
+          if data.hide_arms == false then
+            changed_items["slot_body_arms"] = loadout["slot_body_arms"]
+            visual_loadout["slot_body_arms"] = loadout["slot_body_arms"]
+          end
+        end
+      elseif slot_id == "slot_gear_lowerbody" and custom_item then
+        local data = mod.current_slots_data.gear_customization_data[custom_item.name]
+
+        if data and data.hide_legs == false then
+          changed_items["slot_body_legs"] = loadout["slot_body_legs"]
+          visual_loadout["slot_body_legs"] = loadout["slot_body_legs"]
+        end
+      end
+    end
+  end
+
+  func(self, changed_items, loadout, visual_loadout, equipped_items_or_nil)
+
+  if was_patched then
+    self._single_item_profile_loader = nil
+  end
+end)
+
 mod:hook_require("scripts/utilities/profile_utils", function(instance)
 
   mod:hook(instance, "generate_visual_loadout", function(func, loadout)
@@ -406,40 +460,46 @@ end
 mod:hook_safe(CLASS.CosmeticsVendorView, "on_enter", function(self)
   -- todo: allow preview when equipped on character
   mod:hook_disable(CLASS.UIWeaponSpawner, "_spawn_weapon")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_change_slot_items")
 
-  --mod:hook_disable(CLASS.UIProfileSpawner, "spawn_profile")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_spawn_character_profile")
 end)
 
 mod:hook_safe(CLASS.CosmeticsVendorView, "on_exit", function(self)
   mod:hook_enable(CLASS.UIWeaponSpawner, "_spawn_weapon")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_change_slot_items")
 
-  --mod:hook_enable(CLASS.UIProfileSpawner, "spawn_profile")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_spawn_character_profile")
 end)
 
 mod:hook_safe(CLASS.StoreItemDetailView, "on_enter", function(self)
   -- todo: allow preview when equipped on character
   mod:hook_disable(CLASS.UIWeaponSpawner, "_spawn_weapon")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_change_slot_items")
 
-  --mod:hook_disable(CLASS.UIProfileSpawner, "spawn_profile")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_spawn_character_profile")
 end)
 
 mod:hook_safe(CLASS.StoreItemDetailView, "on_exit", function(self)
   mod:hook_enable(CLASS.UIWeaponSpawner, "_spawn_weapon")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_change_slot_items")
 
-  --mod:hook_enable(CLASS.UIProfileSpawner, "spawn_profile")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_spawn_character_profile")
 end)
 
 mod:hook_safe(CLASS.StoreView, "on_enter", function(self)
   -- todo: allow preview when equipped on character
   mod:hook_disable(CLASS.UIWeaponSpawner, "_spawn_weapon")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_change_slot_items")
 
-  --mod:hook_disable(CLASS.UIProfileSpawner, "spawn_profile")
+  mod:hook_disable(CLASS.UIProfileSpawner, "_spawn_character_profile")
 end)
 
 mod:hook_safe(CLASS.StoreView, "on_exit", function(self)
   mod:hook_enable(CLASS.UIWeaponSpawner, "_spawn_weapon")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_change_slot_items")
 
-  --mod:hook_enable(CLASS.UIProfileSpawner, "spawn_profile")
+  mod:hook_enable(CLASS.UIProfileSpawner, "_spawn_character_profile")
 end)
 
 local ItemSlotSettings = require("scripts/settings/item/item_slot_settings")

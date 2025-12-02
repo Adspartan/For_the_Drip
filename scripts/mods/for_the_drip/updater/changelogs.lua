@@ -2,6 +2,11 @@ local nl_1 ="\n    "
 local nl_2 ="\n      "
 return
 {
+  ["0.12.9"] =
+  {
+    "Fix customization not showing up in the inventory screen and other visual issues by Maddy and sashimichefcat",
+    "Fix crashes related to the No Man's Land update",
+  },
   ["0.12.8"] =
   {
     "Fix some crashes with the Arbites update",
