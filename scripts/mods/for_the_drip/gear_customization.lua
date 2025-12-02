@@ -76,11 +76,11 @@ mod.make_custom_item = function(self, slot_name, source_item, source)
   if slot_name == "slot_body_eye_color" then
     local token = source_item.material_overrides
         and source_item.material_overrides[1]
-        or "eyes_blue_01"      
+        or "eyes_blue_01"
 
     rawset(source_item, "material_overrides", { token })
 
-    
+
     rawset(source_item, "material_override_apply_to_parent", true)
     rawset(source_item, "parent_slot_names", { "slot_body_face" })
 end
@@ -249,7 +249,7 @@ end
         local skin_color_item = loadout["slot_body_skin_color"]
 
         if skin_color_item and skin_color_item ~= "" then
-          
+
           local cloned_skin_item = table.clone_instance(skin_color_item)
 
           if not source_item.attachments then
@@ -289,6 +289,11 @@ end
         ["is_extra"] = true,
         ["is_preview"] = true,
       }
+    end
+
+    -- todo: investigate what it does/used for
+    if not source_item.material_override_items then
+      rawset(source_item, "material_override_items", {})
     end
 
     return source_item
